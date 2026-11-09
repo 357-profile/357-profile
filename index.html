@@ -1361,6 +1361,9 @@ rqBind(document.getElementById('rqPop'),document.getElementById('rqPopErr'),'pty
 const sub=document.getElementById('rqForm');if(sub)sub.addEventListener('submit',()=>{if(sub.querySelector('.bad'))return;ss('rqSent','1')});
 const watch=(el,key,delay,margin)=>{if(!el)return;let t=null;const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){clearTimeout(t);if(!el.__in){el.__in=1;t=setTimeout(()=>open(),delay)}}else{clearTimeout(t);el.__in=0}}),{threshold:0,rootMargin:margin});io.observe(el)};
 const ob=document.getElementById('rqOpen');if(ob)ob.addEventListener('click',()=>open(true));
-watch(feat,'rqPop1',1400,'0px 0px -45% 0px');
+/* first: once, right after the visitor has scrolled past the selected projects */
+(()=>{let done=false;try{done=sessionStorage.getItem('rqPopF')==='1'}catch(e){}if(done)return;let t=null;
+const chk=()=>{if(done)return;const r=feat.getBoundingClientRect();if(r.bottom<innerHeight*.55&&r.bottom>-innerHeight*1.5){if(!t)t=setTimeout(()=>{if(pop.hidden){done=true;try{sessionStorage.setItem('rqPopF','1')}catch(e){}open();removeEventListener('scroll',chk)}t=null},700)}else{clearTimeout(t);t=null}};
+addEventListener('scroll',chk,{passive:true});})();
 watch(end,'rqPop2',1200,'0px 0px -35% 0px');})();
 </script>
