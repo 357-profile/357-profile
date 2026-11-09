@@ -1365,5 +1365,5 @@ const ob=document.getElementById('rqOpen');if(ob)ob.addEventListener('click',()=
 (()=>{let done=false;try{done=sessionStorage.getItem('rqPopF')==='1'}catch(e){}if(done)return;let t=null;
 const chk=()=>{if(done)return;const r=feat.getBoundingClientRect();if(r.bottom<innerHeight*.55&&r.bottom>-innerHeight*1.5){if(!t)t=setTimeout(()=>{if(pop.hidden){done=true;try{sessionStorage.setItem('rqPopF','1')}catch(e){}open();removeEventListener('scroll',chk)}t=null},700)}else{clearTimeout(t);t=null}};
 addEventListener('scroll',chk,{passive:true});})();
-watch(end,'rqPop2',1200,'0px 0px -35% 0px');})();
+})();
 </script>
