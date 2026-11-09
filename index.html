@@ -707,7 +707,7 @@ html.en .mission .lat{display:none}
         <div class="no"><span>اللوحة</span><span class="mono">01</span></div>
       </div>
       <span class="lat">Our Vision</span>
-      <p class="manifesto" id="manifesto" style="margin-top:18px">أن نكون الخيار الأول في المملكة في العمارة والتصميم الداخلي، بأعمال تجمع بين الأصالة والابتكار وتدوم مع الزمن.</p>
+      <p class="manifesto" id="manifesto" style="margin-top:18px">أن نكون الخيار الأول في المملكة للعمارة والتصميم الداخلي، بأعمال تجمع الأصالة والابتكار.</p>
 
       <div class="about-row">
         <div class="mission rv">
@@ -959,7 +959,7 @@ function heroFrame(t){
 
 /* ---------- manifesto words ---------- */
 const man=$('#manifesto');
-const MAN_AR=man.textContent.trim(),MAN_EN='To be the first choice in the Kingdom for architecture and interior design, with work that unites authenticity and innovation and endures over time.';
+const MAN_AR=man.textContent.trim(),MAN_EN='To be the Kingdom’s first choice for architecture and interior design, with work that unites authenticity and innovation.';
 let words=[];
 function buildMan(){man.innerHTML=L(MAN_AR,MAN_EN).split(' ').map(w=>'<span class="wd'+(/الأصالة|والابتكار|وتدوم|الزمن|authenticity|innovation|endures|time/.test(w)?' gold':'')+'">'+w+'</span>').join(' ');words=[...man.querySelectorAll('.wd')];if(reduce)words.forEach(w=>w.classList.add('lit'))}
 buildMan();
