@@ -663,6 +663,16 @@ html.en .mission .lat{display:none}
 @media(hover:none){.tm-ph img{filter:none}}
 @media(max-width:1000px){.tm-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:420px){.tm h3{font-size:.95rem}.tm p{font-size:.78rem}}
+
+.fd{display:grid;grid-template-columns:minmax(220px,340px) 1fr;gap:clamp(28px,5vw,72px);align-items:center;padding-bottom:clamp(40px,5vw,64px);margin-bottom:clamp(40px,5vw,64px);border-bottom:1px solid var(--line)}
+.fd-ph{position:relative;aspect-ratio:1;border-radius:50%;padding:10px;border:1px solid var(--gold)}
+.fd-ph:before{content:"";position:absolute;inset:-12px;border-radius:50%;border:1px dashed var(--line)}
+.fd-ph img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;filter:grayscale(1)}
+.fd h3{font-size:clamp(1.4rem,2.4vw,2rem);font-weight:300;margin:8px 0 6px;color:var(--ivory)}
+.fd .tm-r{display:block;font-size:.85rem;color:var(--gold);margin-bottom:22px}
+.fd blockquote{margin:0 0 20px;padding-inline-start:18px;border-inline-start:2px solid var(--gold);font-size:clamp(1.05rem,1.7vw,1.35rem);font-weight:300;line-height:1.8;color:var(--ivory)}
+.fd p{font-size:.88rem;line-height:1.9;color:var(--mute);margin:0;max-width:62ch}
+@media(max-width:760px){.fd{grid-template-columns:1fr;text-align:center}.fd-ph{width:min(240px,70%);margin:0 auto}.fd blockquote{border:0;padding:0}.fd p{margin-inline:auto}}
 </style>
 
 <div dir="rtl" lang="ar">
@@ -828,6 +838,16 @@ html.en .mission .lat{display:none}
       <div class="sheet-head rv">
         <h2 data-en="Our Team">فريقنا</h2>
         <div class="no"><span data-en="Architects and engineers across every discipline">معماريون ومهندسون في كل التخصصات</span></div>
+      </div>
+      <div class="fd rv">
+        <div class="fd-ph"><img loading="lazy" src="img/team/yousef-alrajhi.jpg" alt="يوسف بن سليمان الراجحي" data-en-alt="Yousef bin Sulaiman Al-Rajhi"></div>
+        <div class="fd-tx">
+          <span class="lat">Founder &amp; Chairman</span>
+          <h3 data-en="Yousef bin Sulaiman Al-Rajhi">يوسف بن سليمان الراجحي</h3>
+          <span class="tm-r" data-en="Founder &amp; Chairman of the Board">المؤسس ورئيس مجلس الإدارة</span>
+          <blockquote data-en="“We build dreams into reality, where vision meets construction, to shape spaces and inspire life.”">«نبني الأحلام واقعاً، حيث تلتقي الرؤية بالبناء، لنشكّل المساحات ونلهم الحياة.»</blockquote>
+          <p data-en="A businessman and investor, he is Chairman of Al Rajhi International Investment Company and a son of Saudi businessman Sheikh Sulaiman bin Abdulaziz Al-Rajhi. His leadership roles include Chairman of YR Capital and Board Member of Sulaiman Al Rajhi Holding.">رجل أعمال ومستثمر، ورئيس مجلس إدارة شركة الراجحي الدولية للاستثمار، وأحد أبناء رجل الأعمال السعودي الشيخ سليمان بن عبدالعزيز الراجحي. يشغل مناصب قيادية، من بينها رئاسة مجلس إدارة YR Capital، وعضوية مجلس إدارة سليمان الراجحي القابضة.</p>
+        </div>
       </div>
       <div class="tm-grid" id="tmGrid"></div>
     </div>
@@ -1345,7 +1365,7 @@ P.forEach(p=>{p._n=p.n;p._d=p.d});Object.keys(S).forEach(k=>S[k]._ar=S[k].ar);Ob
 const TIPS_AR=JSON.parse(JSON.stringify(TIPS)),PAL_AR=JSON.parse(JSON.stringify(PAL)),Q_AR=SECT[0].qs.map(q=>q.q),SPACE_AR=SPACE.slice();
 const root=document.querySelector('div[dir]');
 function walk(fn){const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:n=>n.parentElement&&!n.parentElement.closest('script,style,#quizBox,#ixList,#fTrack,#filters,#cmpTabs,#manifesto,[data-en]')?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT});let n;while(n=w.nextNode())fn(n)}
-const ATTR_EN={"357 الرئيسية": "357 Home", "أقسام الموقع": "Site sections", "مقدمة": "Introduction", "رسم خطي لواجهة مبنى إداري": "Line drawing of an office building façade", "الواجهة نفسها بعد التنفيذ": "The same façade as built", "بيانات المكتب": "Studio details", "مجسم معماري لفيلا على طاولة التصميم": "Architectural model of a villa on the design table", "مشاريع مختارة": "Selected work", "اختر مشروعاً للمقارنة": "Choose a project to compare", "حرّك للمقارنة بين المخطط والواقع": "Drag to compare sketch and reality", "تصفية حسب القطاع": "Filter by sector", "افتح الموقع على الخريطة": "Open location on map", "راسلنا على واتساب": "Message us on WhatsApp", "راسلنا بالإيميل": "Email us", "زيارة الموقع الإلكتروني": "Visit website", "واتساب": "WhatsApp", "جولة داخل المنزل": "Home tour", "إغلاق": "Close", "تقدّم": "Progress", "السابقة": "Previous", "التالية": "Next"};
+const ATTR_EN={"يوسف بن سليمان الراجحي":"Yousef bin Sulaiman Al-Rajhi","357 الرئيسية": "357 Home", "أقسام الموقع": "Site sections", "مقدمة": "Introduction", "رسم خطي لواجهة مبنى إداري": "Line drawing of an office building façade", "الواجهة نفسها بعد التنفيذ": "The same façade as built", "بيانات المكتب": "Studio details", "مجسم معماري لفيلا على طاولة التصميم": "Architectural model of a villa on the design table", "مشاريع مختارة": "Selected work", "اختر مشروعاً للمقارنة": "Choose a project to compare", "حرّك للمقارنة بين المخطط والواقع": "Drag to compare sketch and reality", "تصفية حسب القطاع": "Filter by sector", "افتح الموقع على الخريطة": "Open location on map", "راسلنا على واتساب": "Message us on WhatsApp", "راسلنا بالإيميل": "Email us", "زيارة الموقع الإلكتروني": "Visit website", "واتساب": "WhatsApp", "جولة داخل المنزل": "Home tour", "إغلاق": "Close", "تقدّم": "Progress", "السابقة": "Previous", "التالية": "Next"};
 function setAttrs(en){document.querySelectorAll('[aria-label],[title],img[alt]').forEach(el=>['aria-label','title','alt'].forEach(a=>{if(!el.hasAttribute(a))return;const k='ar_'+a.replace('-','');if(el.dataset[k]===undefined)el.dataset[k]=el.getAttribute(a);const o=el.dataset[k];if(ATTR_EN[o])el.setAttribute(a,en?ATTR_EN[o]:o)}))}
 function setLang(l){
   LANG=l;const en=l==='en';
