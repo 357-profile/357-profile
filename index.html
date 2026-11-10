@@ -673,6 +673,14 @@ html.en .mission .lat{display:none}
 .fd blockquote{margin:0 0 20px;padding-inline-start:18px;border-inline-start:2px solid var(--gold);font-size:clamp(1.05rem,1.7vw,1.35rem);font-weight:300;line-height:1.8;color:var(--ivory)}
 .fd p{font-size:.88rem;line-height:1.9;color:var(--mute);margin:0;max-width:62ch}
 @media(max-width:760px){.fd{grid-template-columns:1fr;text-align:center}.fd-ph{width:min(240px,70%);margin:0 auto}.fd blockquote{border:0;padding:0}.fd p{margin-inline:auto}}
+
+#tmLead{margin-bottom:clamp(36px,4.5vw,56px)}
+.tm-lead{display:grid;grid-template-columns:minmax(220px,360px) 1fr;gap:clamp(24px,4vw,56px);align-items:end}
+.tm-lead h3{font-size:clamp(1.3rem,2vw,1.7rem);font-weight:300;margin-top:0}
+.tm-lead .tm-r{font-size:.88rem;margin-bottom:14px}
+.tm-lead p{font-size:.92rem;max-width:52ch}
+.tm-lead>div:not(.tm-ph){padding-bottom:8px}
+@media(max-width:760px){.tm-lead{grid-template-columns:1fr}.tm-lead .tm-ph{max-width:340px}}
 </style>
 
 <div dir="rtl" lang="ar">
@@ -849,6 +857,7 @@ html.en .mission .lat{display:none}
           <p data-en="A businessman and investor, he is Chairman of Al Rajhi International Investment Company and a son of Saudi businessman Sheikh Sulaiman bin Abdulaziz Al-Rajhi. His leadership roles include Chairman of YR Capital and Board Member of Sulaiman Al Rajhi Holding.">رجل أعمال ومستثمر، ورئيس مجلس إدارة شركة الراجحي الدولية للاستثمار، وأحد أبناء رجل الأعمال السعودي الشيخ سليمان بن عبدالعزيز الراجحي. يشغل مناصب قيادية، من بينها رئاسة مجلس إدارة YR Capital، وعضوية مجلس إدارة سليمان الراجحي القابضة.</p>
         </div>
       </div>
+      <div id="tmLead"></div>
       <div class="tm-grid" id="tmGrid"></div>
     </div>
   </section>
@@ -1432,18 +1441,20 @@ addEventListener('scroll',chk,{passive:true});})();
 
 /* ---------- team ---------- */
 const TEAM=[
- {img:'carlo-cortez',n:'كارلو سي. كورتيز',ne:'Carlo C. Cortez',r:'رئيس قسم هندسة التصميم',re:'Head of Design Engineering',d:'مهندس تصميم أول بخبرة تتجاوز 30 عاماً، يقود إدارة المشاريع وتطوير الأعمال في 357.',de:'Senior design engineer with 30+ years of experience, leading project management and business development at 357.'},
- {img:'karim-hassan',n:'كريم حسن',ne:'Karim Hassan',r:'مدير المشاريع',re:'Project Manager',d:'خبرة 17 عاماً في قيادة المشاريع من التخطيط حتى التسليم، وفق الجودة والجدول والميزانية.',de:'17 years leading projects from planning to handover, on quality, schedule and budget.'},
+ {lead:1,img:'karim-hassan',n:'كريم حسن',ne:'Karim Hassan',r:'مدير المشاريع',re:'Project Manager',d:'خبرة 17 عاماً في قيادة المشاريع من التخطيط حتى التسليم، وفق الجودة والجدول والميزانية.',de:'17 years leading projects from planning to handover, on quality, schedule and budget.'},
  {img:'',mono:'ح',n:'حنين العمري',ne:'Haneen Al-Omari',r:'مسؤولة التسويق',re:'Marketing Lead',d:'تدير الهوية البصرية وحضور الشركة في وسائل التواصل والمحتوى التسويقي.',de:'Manages the visual identity, social media presence and marketing content.'},
  {img:'alhanouf-alkhairi',n:'الهنوف الخيري',ne:'Alhanouf Alkhairi',r:'مصممة داخلية',re:'Interior Designer',d:'تصمم فراغات توازن بين الجمال والوظيفة. حاصلة على المركز الثاني في التصميم الداخلي ضمن ديزايناثون 2026.',de:'Designs spaces that balance beauty and function. Awarded second place in Interior Design at Designathon 2026.'},
  {img:'lina-abushanab',n:'لينا أبو شنب',ne:'Lina Abu Shanab',r:'مديرة القسم المعماري',re:'Head of Architecture',d:'تقود التصميم المعماري، وتحوّل الأفكار إلى تصاميم مبتكرة قابلة للتنفيذ.',de:'Leads architectural design, turning ideas into innovative, buildable designs.'},
  {img:'marwa-sharif',n:'مروة شريف',ne:'Marwa Sharif',r:'مديرة القسم الكهربائي',re:'Head of Electrical',d:'تشرف على تصميم الأنظمة الكهربائية والإضاءة بكفاءة وأمان.',de:'Oversees electrical and lighting design with efficiency and safety.'},
  {img:'',mono:'ح',n:'حافظ الرحمن',ne:'Hafiz Al-Rahman',r:'مدير القسم الميكانيكي',re:'Head of Mechanical',d:'يشرف على أنظمة التكييف والسباكة والحماية من الحريق.',de:'Oversees HVAC, plumbing and fire protection systems.'},
  {img:'mohammed-bashar',n:'محمد بشار',ne:'Mohammed Bashar',r:'رسّام معماري أول',re:'Senior Architectural Draftsman',d:'يحوّل المخططات إلى رسومات تنفيذية دقيقة لا تترك شيئاً للصدفة.',de:'Turns plans into precise construction drawings that leave nothing to chance.'},
+ {img:'carlo-cortez',n:'كارلو سي. كورتيز',ne:'Carlo C. Cortez',r:'رئيس قسم هندسة التصميم',re:'Head of Design Engineering',d:'مهندس تصميم أول بخبرة تتجاوز 30 عاماً، يقود إدارة المشاريع وتطوير الأعمال في 357.',de:'Senior design engineer with 30+ years of experience, leading project management and business development at 357.'},
  {img:'adel',n:'عادل بوليكال',ne:'Adel Bulikal',r:'مصمم معماري',re:'Architectural Designer',d:'يحوّل المفاهيم إلى تصاميم وواجهات مبتكرة تجسّد رؤية العميل.',de:'Turns concepts into innovative designs and façades that realise the client’s vision.'}
 ];
 let _tmLang=null;function renderTeam(){const g=document.getElementById('tmGrid');if(!g)return;const en=document.documentElement.classList.contains('en');if(_tmLang===en)return;_tmLang=en;
-g.innerHTML=TEAM.map(t=>'<article class="tm"><div class="tm-ph"><span class="tm-c"></span>'+(t.img?'<img loading="lazy" src="img/team/'+t.img+'.jpg" alt="'+(en?t.ne:t.n)+'">':'<span class="tm-mono" aria-hidden="true">'+(en?t.ne[0]:t.mono)+'</span>')+'</div><h3>'+(en?t.ne:t.n)+'</h3><span class="tm-r">'+(en?t.re:t.r)+'</span><p>'+(en?t.de:t.d)+'</p></article>').join('')}
+const card=t=>'<article class="tm"><div class="tm-ph"><span class="tm-c"></span>'+(t.img?'<img loading="lazy" src="img/team/'+t.img+'.jpg" alt="'+(en?t.ne:t.n)+'">':'<span class="tm-mono" aria-hidden="true">'+(en?t.ne[0]:t.mono)+'</span>')+'</div><div class="tm-tx"><h3>'+(en?t.ne:t.n)+'</h3><span class="tm-r">'+(en?t.re:t.r)+'</span><p>'+(en?t.de:t.d)+'</p></div></article>';
+const ld=document.getElementById('tmLead'),lt=TEAM.filter(t=>t.lead);if(ld)ld.innerHTML=lt.map(t=>card(t).replace('class="tm"','class="tm tm-lead"')).join('');
+g.innerHTML=TEAM.filter(t=>!t.lead).map(card).join('')}
 renderTeam();new MutationObserver(renderTeam).observe(document.documentElement,{attributes:true,attributeFilter:['class']});
 </script>
 
