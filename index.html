@@ -994,7 +994,7 @@ function layoutFeat(){
 
 /* ---------- index ---------- */
 const fl=$('#filters'),list=$('#ixList');let cur='all';
-[['all','الكل',P.length]].concat(order.map(k=>[k,S[k].ar,P.filter(p=>p.s===k).length])).forEach(([k,l,c])=>{
+order.map(k=>[k,S[k].ar,P.filter(p=>p.s===k).length]).concat([['all','الكل',P.length]]).forEach(([k,l,c])=>{
   const b=document.createElement('button');b.className='chip';b.dataset.f=k;b.setAttribute('role','tab');b.innerHTML=l+'<em>'+c+'</em>';b.onclick=()=>setFilter(k);fl.appendChild(b)});
 function setFilter(k){cur=k;[...fl.children].forEach(b=>{const on=b.dataset.f===k;b.classList.toggle('on',on);b.setAttribute('aria-selected',on)});renderIx(true)}
 function renderIx(anim){
@@ -1007,7 +1007,7 @@ function renderIx(anim){
     list.appendChild(r);
   });
 }
-setFilter('all');
+setFilter(order[0]);
 const peek=$('#peek'),pimg=peek.querySelector('img');let peekI=-1,peekT=0;
 list.addEventListener('pointermove',e=>{
   const r=e.target.closest('.ix-row');if(!r){peek.classList.remove('show');return}
