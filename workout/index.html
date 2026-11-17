@@ -1,0 +1,1010 @@
+<!doctype html><html lang="ar"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>body{margin:0}img{max-width:100%}</style></head><body><title>Complete Workout Plan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap">
+<style>
+/* Layout: page tabs on top, then day tabs and a grid of animated move cards; a card opens a full-screen view with the log. Single light pink look by choice. */
+:root {
+  --bg: #fff8fa;
+  --surface: #ffffff;
+  --blush: #fdeaf1;
+  --rose: #e2557f;
+  --rose-ink: #b42f59;
+  --plum: #3f1d36;
+  --muted: #8a6b7b;
+  --line: #f3d6e1;
+  --muscle: #ff1f56;
+  --ok: #2f9e6e;
+  --font: "Tajawal", "Segoe UI", system-ui, sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { background: var(--bg); color: var(--plum); }
+body { font-family: var(--font); font-size: 16px; line-height: 1.6; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 56px; }
+.wrap { max-width: 980px; margin: 0 auto; display: grid; gap: 18px; }
+h1, h2, h3, h4 { margin: 0; text-wrap: balance; line-height: 1.3; font-weight: 800; }
+button, input { font-family: inherit; color: inherit; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--rose); outline-offset: 2px; }
+
+header { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 6px 16px; }
+h1 { font-size: clamp(24px, 4.6vw, 34px); }
+.wk { font-size: 14px; color: var(--rose-ink); font-weight: 700; background: var(--blush); border-radius: 999px; padding: 3px 12px; }
+
+.pages { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 5px; }
+@media (max-width: 560px) { .pages { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.pg { border: 0; background: transparent; border-radius: 12px; padding: 9px 4px; font-weight: 700; font-size: 15px; cursor: pointer; color: var(--muted); }
+.pg[aria-pressed="true"] { background: var(--rose); color: #fff; }
+
+.days { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 640px) { .days { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.day { position: relative; border: 1px solid var(--line); background: var(--surface); border-radius: 14px; padding: 9px 12px; text-align: start; display: grid; cursor: pointer; min-width: 0; }
+.day .n { font-size: 12.5px; color: var(--muted); }
+.day .t { font-weight: 800; font-size: 15px; line-height: 1.35; }
+.day[aria-pressed="true"] { border-color: var(--rose); background: var(--blush); }
+.day .done { position: absolute; top: 8px; inset-inline-end: 10px; width: 20px; height: 20px; border-radius: 50%; background: var(--ok); color: #fff; font-size: 12px; display: grid; place-items: center; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 4px 12px; font-size: 14px; }
+button.chip { cursor: pointer; color: var(--rose-ink); font-weight: 700; }
+.chip.eat { background: var(--rose); border-color: var(--rose); color: #fff; font-weight: 700; }
+.lead { margin: 0; color: var(--muted); font-size: 15px; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 12px; }
+.card { position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; display: grid; grid-template-rows: auto 1fr; min-width: 0; cursor: pointer; text-align: start; padding: 0; }
+.card.is-done { border-color: var(--ok); }
+.thumb { position: relative; background: linear-gradient(180deg, #fff3f7, #fbdde8); aspect-ratio: 250 / 165; }
+.thumb canvas { width: 100%; height: 100%; display: block; }
+.num { position: absolute; top: 9px; inset-inline-start: 12px; font-weight: 800; font-size: 14px; color: var(--rose-ink); }
+.check { position: absolute; top: 8px; inset-inline-end: 8px; width: 34px; height: 34px; border-radius: 50%; border: 2px solid #e8bfd0; background: rgba(255,255,255,.9); display: grid; place-items: center; cursor: pointer; color: transparent; font-weight: 800; font-size: 16px; }
+.check[aria-pressed="true"] { background: var(--ok); border-color: var(--ok); color: #fff; }
+.cbody { padding: 10px 14px 12px; display: grid; gap: 2px; min-width: 0; }
+.cbody h4 { font-size: 17px; }
+.lift { font-weight: 800; color: var(--rose-ink); font-size: 16px; }
+.sub { font-size: 13.5px; color: var(--muted); }
+
+/* modal */
+.modal { position: fixed; inset: 0; z-index: 30; background: rgba(63,29,54,.38); display: grid; place-items: center; padding: max(12px, env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) max(12px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)); }
+.sheet { background: var(--surface); border-radius: 24px; width: min(760px, 100%); max-height: 100%; overflow: auto; display: grid; }
+.stage { position: relative; background: linear-gradient(180deg, #fff1f6, #f9d3e1); aspect-ratio: 250 / 170; }
+.stage canvas { width: 100%; height: 100%; display: block; }
+.x { position: absolute; top: 10px; inset-inline-start: 10px; width: 40px; height: 40px; border-radius: 50%; border: 0; background: rgba(255,255,255,.92); font-size: 20px; cursor: pointer; }
+.speed { position: absolute; top: 10px; inset-inline-end: 10px; border: 0; background: rgba(255,255,255,.92); border-radius: 999px; padding: 7px 14px; font-weight: 700; cursor: pointer; font-size: 14px; }
+.speed[aria-pressed="true"] { background: var(--plum); color: #fff; }
+.mbody { padding: 16px 18px 20px; display: grid; gap: 14px; }
+.mtop { display: flex; justify-content: space-between; gap: 12px; align-items: start; }
+.mtop h2 { font-size: 22px; }
+.mtop .en { font-size: 12px; letter-spacing: .12em; color: var(--muted); text-transform: uppercase; }
+.big { font-size: 22px; font-weight: 800; color: var(--rose-ink); }
+.maps { display: flex; gap: 10px; align-items: start; flex: none; }
+.maps figure { margin: 0; display: grid; justify-items: center; gap: 0; }
+.maps svg { width: 52px; height: auto; }
+.maps figcaption { font-size: 11.5px; color: var(--muted); }
+.mchip { font-size: 13px; padding: 1px 10px; border-radius: 999px; background: #ffe3ea; color: #c4123f; font-weight: 500; }
+.tip { margin: 0; font-size: 14.5px; border-inline-start: 3px solid var(--rose); padding: 1px 10px; }
+.logrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: var(--bg); border-radius: 14px; padding: 10px 12px; }
+.logrow label { font-weight: 700; font-size: 15px; }
+.logrow input { width: 90px; border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; font-size: 16px; background: var(--surface); }
+.btn { border: 0; border-radius: 999px; padding: 9px 18px; font-weight: 800; font-size: 15px; cursor: pointer; background: var(--rose); color: #fff; }
+.btn.ghost { background: var(--surface); color: var(--plum); border: 1px solid var(--line); }
+.btn.okd { background: var(--ok); }
+.hist { display: flex; flex-wrap: wrap; gap: 6px; }
+.hist span { font-size: 13px; background: var(--blush); border-radius: 8px; padding: 2px 8px; }
+.saved { font-size: 13px; color: var(--ok); font-weight: 700; }
+
+/* log page */
+.week { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.wd { border: 1px solid var(--line); border-radius: 14px; padding: 10px; text-align: center; background: var(--surface); }
+.wd.ok { border-color: var(--ok); background: #eaf7f0; }
+.wd b { display: block; font-size: 22px; }
+.stepper { display: inline-flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 4px; }
+.stepper button { width: 34px; height: 34px; border-radius: 50%; border: 0; background: var(--blush); font-size: 18px; font-weight: 800; cursor: pointer; }
+.tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 15px; }
+th, td { padding: 10px 12px; text-align: start; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { font-size: 13px; color: var(--muted); font-weight: 500; }
+td.go { color: var(--rose-ink); font-weight: 800; }
+tr:last-child td { border-bottom: 0; }
+tbody tr { cursor: pointer; }
+.note { font-size: 13.5px; color: var(--muted); margin: 0; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap" dir="rtl">
+  <header>
+    <h1 dir="ltr">Complete Workout Plan</h1>
+    <span class="wk" id="wkLabel"></span>
+  </header>
+  <nav class="pages" id="pages" aria-label="الصفحات">
+    <button class="pg" data-p="plan">البرنامج</button>
+    <button class="pg" data-p="cardio">كارديو</button>
+    <button class="pg" data-p="pilates">بيلاتس</button>
+    <button class="pg" data-p="warm">إحماء</button>
+    <button class="pg" data-p="stretch">إطالة</button>
+    <button class="pg" data-p="log">سجلي</button>
+  </nav>
+  <main id="view" style="display:grid;gap:16px"></main>
+</div>
+
+<div class="modal" id="modal" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="mName">
+    <div class="stage"><canvas id="mCv"></canvas>
+      <button class="x" id="mClose" aria-label="إغلاق">×</button>
+      <button class="speed" id="mSlow" aria-pressed="false">بطيء</button>
+    </div>
+    <div class="mbody" id="mBody"></div>
+  </div>
+</div>
+
+<script>
+// ---- Skeleton engine: side-view mannequin driven by segment angles (deg, 0 = right, 90 = down) ----
+const SEG = { T: 48, UA: 27, FA: 25, TH: 40, SH: 38, FT: 11, NECK: 16 };
+const R = { hip: 9, sh: 8, head: 9, limb: 4.5 };
+function dir(a) { const r = a * Math.PI / 180; return [Math.cos(r), Math.sin(r)]; }
+function add(p, d, l) { return [p[0] + d[0] * l, p[1] + d[1] * l]; }
+function norm(p) {
+  const leg = (l) => [l[0], l[1], l[2] ?? (l[1] - 90), l[3] ?? 1];
+  const arm = (a) => [a[0], a[1], a[2] ?? 1];
+  return { t: p.t, h: p.h ?? p.t, an: arm(p.an), af: arm(p.af), ln: leg(p.ln), lf: leg(p.lf) };
+}
+function lerpPose(A, B, k) {
+  const l = (a, b) => a + (b - a) * k;
+  const la = (x, y) => x.map((v, i) => l(v, y[i]));
+  return { t: l(A.t, B.t), h: l(A.h, B.h), an: la(A.an, B.an), af: la(A.af, B.af), ln: la(A.ln, B.ln), lf: la(A.lf, B.lf) };
+}
+function solve(p) {
+  const hip = [0, 0];
+  const d = dir(p.t);
+  const sh = add(hip, d, SEG.T);
+  const head = add(sh, dir(p.h), SEG.NECK);
+  const arm = (a) => { const e = add(sh, dir(a[0]), SEG.UA * a[2]); const w = add(e, dir(a[1]), SEG.FA * a[2]); return { s: sh, e, w, a }; };
+  const leg = (l) => { const k = add(hip, dir(l[0]), SEG.TH * l[3]); const an = add(k, dir(l[1]), SEG.SH * l[3]); const toe = add(an, dir(l[2]), SEG.FT); return { h: hip, k, an, toe, l }; };
+  const S = { hip, sh, head, d, hd: dir(p.h), front: [-d[1], d[0]], an: arm(p.an), af: arm(p.af), ln: leg(p.ln), lf: leg(p.lf) };
+  S.pt = { hip, sh, head, wN: S.an.w, wF: S.af.w, eN: S.an.e, kN: S.ln.k, kF: S.lf.k, anN: S.ln.an, anF: S.lf.an, toeN: S.ln.toe, toeF: S.lf.toe };
+  return S;
+}
+const PR = { hip: R.hip, sh: R.sh, head: R.head, wN: R.limb, wF: R.limb, eN: R.limb, kN: R.limb + 1, kF: R.limb + 1, anN: R.limb, anF: R.limb, toeN: 2.5, toeF: 2.5 };
+function bottom(S, keys) { return Math.max(...(keys || Object.keys(PR)).map(k => S.pt[k][1] + PR[k])); }
+function bbox(S) { const xs = Object.values(S.pt).map(p => p[0]); return [Math.min(...xs) - 9, Math.max(...xs) + 9]; }
+
+// ---- poses ----
+const STAND = { t: -90, an: [92, 92], af: [88, 88], ln: [90, 90], lf: [90, 90] };
+const QUAD = { t: -14, h: -4, an: [90, 90], af: [90, 90], ln: [92, 180, 180], lf: [90, 180, 180] };
+const SUP_KNEES = { ln: [-50, 60, 0], lf: [-48, 62, 0] };
+const SEAT = { t: -98, h: -94, an: [80, 40], af: [78, 38], ln: [0, 90], lf: [2, 92] };
+const WALK_A = { t: -86, an: [72, 58], af: [108, 100], ln: [66, 98], lf: [112, 82] };
+const WALK_B = { t: -86, an: [108, 100], af: [72, 58], ln: [112, 82], lf: [66, 98] };
+const BRIDGE_UP = { t: 155, h: 172, an: [10, 2], af: [10, 2], ln: [-18, 82, 0], lf: [-16, 84, 0] };
+
+// w = weights by stage [week 1-2, 3-4, 5+] in kg (0 = no weight); per = 'يد' | 'رجل'
+// r = reps by stage; area: g glutes, l legs, b back, c chest, s shoulders, a arms, x abs, k cardio
+const EX = {
+  hipthrust: { ar: 'هيب ثرست', en: 'Hip Thrust', area: 'g', m: ['gmax', 'hams'], mach: 'بار + بنش أو جهاز Hip Thrust', w: [20, 25, 30], w0: 'البار فاضي', unit: 'كجم',
+    props: [{ k: 'bench', x0: ['sh', -46], x1: ['sh', 8], top: ['sh', R.sh] }, { k: 'barbell', at: 'hip' }],
+    A: { t: 214, h: 236, an: [40, -10], af: [38, -12], ln: [-40, 70, 0], lf: [-38, 72, 0] },
+    B: { t: 183, h: 222, an: [12, -30], af: [10, -32], ln: [-2, 90, 0], lf: [0, 92, 0] },
+    tip: 'الذقن للصدر، واعصري المؤخرة فوق ثانيتين.' },
+  rdl: { ar: 'رومانيان ديدلفت', en: 'Romanian Deadlift', area: 'g', m: ['hams', 'gmax', 'lowback'], mach: 'دمبلز', eq: 'db', w: [5, 7, 9], per: 'يد',
+    A: STAND, B: { t: -18, h: -10, an: [90, 90], af: [88, 88], ln: [80, 96], lf: [78, 98] },
+    tip: 'الظهر مستقيم والحوض يرجع للخلف.' },
+  kickback: { ar: 'ركلة خلفية بالكيبل', en: 'Cable Kickback', area: 'g', m: ['gmax', 'gmed'], mach: 'كيبل + حزام كاحل', w: [5, 7.5, 10], per: 'رجل', ground: ['anF', 'toeF'],
+    props: [{ k: 'cable', post: ['wN', 12], pulley: ['wN', 8, 158], to: 'anN' }],
+    A: { t: -62, h: -50, an: [4, 6], af: [8, 10], ln: [102, 96, 6], lf: [94, 88] },
+    B: { t: -58, h: -48, an: [4, 6], af: [8, 10], ln: [152, 158, 70], lf: [94, 88] },
+    tip: 'لا تقوّسين ظهرك، الحركة من المؤخرة.' },
+  abduction: { ar: 'جهاز فتح الرجلين', en: 'Hip Abduction', area: 'g', m: ['gmed', 'gmax'], mach: 'جهاز Hip Abduction', w: [20, 25, 30], unit: 'كجم', view: 'front', r: ['١٢', '١٥', '١٥'],
+    FA: { seated: 1, legs: 5, arms: 12 }, FB: { seated: 1, legs: 32, arms: 12 }, pads: 'out',
+    tip: 'ميلي لقدام شوي عشان تشتغل المؤخرة أكثر.' },
+  legcurl: { ar: 'ثني الرجل منبطحة', en: 'Lying Leg Curl', area: 'l', m: ['hams'], mach: 'جهاز Leg Curl', w: [10, 15, 20], ground: ['hip', 'sh', 'kN', 'kF'], elev: 40,
+    props: [{ k: 'bench', x0: ['kN', -4], x1: ['sh', 12], top: ['hip', R.hip] }, { k: 'pad', at: 'anN' }],
+    A: { t: 0, h: -8, an: [72, 90], af: [74, 92], ln: [180, 182, 182], lf: [178, 180, 180] },
+    B: { t: 0, h: -8, an: [72, 90], af: [74, 92], ln: [180, 268, 178], lf: [178, 266, 176] },
+    tip: 'الحوض لاصق بالجهاز.' },
+
+  pulldown: { ar: 'سحب أمامي', en: 'Lat Pulldown', area: 'b', m: ['back', 'biceps'], mach: 'جهاز Lat Pulldown', w: [15, 20, 25],
+    props: [{ k: 'seat', at: 'hip' }, { k: 'kneepad', at: 'kN' }, { k: 'cable', post: ['hip', -34], pulley: ['wN', 0, 12], to: 'wN', bar: true }],
+    A: { t: -98, h: -96, an: [-78, -84], af: [-80, -86], ln: [0, 90], lf: [2, 92] },
+    B: { t: -104, h: -100, an: [102, -72], af: [100, -74], ln: [0, 90], lf: [2, 92] },
+    tip: 'اسحبي البار لأعلى صدرك.' },
+  cablerow: { ar: 'سحب كيبل جالس', en: 'Seated Cable Row', area: 'b', m: ['back', 'biceps'], mach: 'جهاز Seated Row', w: [15, 20, 25], ground: ['hip'], elev: 22,
+    props: [{ k: 'seat', at: 'hip' }, { k: 'footplate', at: 'anN' }, { k: 'cable', post: ['anN', 22], pulley: ['anN', 14, ['anN', -4]], to: 'wN' }],
+    A: { t: -72, h: -64, an: [2, 4], af: [4, 6], ln: [-8, 16, -72], lf: [-6, 18, -70] },
+    B: { t: -96, h: -92, an: [166, 4], af: [164, 6], ln: [-8, 16, -72], lf: [-6, 18, -70] },
+    tip: 'الصدر مرفوع والأكواع للخلف.' },
+  chestpress: { ar: 'جهاز الصدر', en: 'Chest Press', area: 'c', m: ['chest', 'triceps'], mach: 'جهاز Chest Press', w: [10, 15, 20],
+    props: [{ k: 'seat', at: 'hip', back: true }, { k: 'handles' }],
+    A: { t: -94, h: -92, an: [165, 0], af: [163, 2], ln: [0, 90], lf: [2, 92] },
+    B: { t: -94, h: -92, an: [2, 0], af: [4, 2], ln: [0, 90], lf: [2, 92] },
+    tip: 'ادفعي بدون ما تقفلين الكوع.' },
+  pecdeck: { ar: 'جهاز الفراشة', en: 'Pec Deck', area: 'c', m: ['chest'], mach: 'جهاز Pec Deck', w: [10, 15, 20], view: 'front',
+    FA: { seated: 1, legs: 8, pec: 1 }, FB: { seated: 1, legs: 8, pec: 0.18 }, pads: 'pec',
+    tip: 'ضمي ببطء واعصري الصدر بالنص.' },
+  lateral: { ar: 'رفرفة جانبية', en: 'Lateral Raise', area: 's', m: ['shoulders'], mach: 'دمبلز', w: [2, 3, 4], per: 'يد', view: 'front', r: ['١٢', '١٢', '١٥'],
+    FA: { legs: 3, arms: 10, db: 1 }, FB: { legs: 3, arms: 84, db: 1 },
+    tip: 'ارفعي لمستوى الكتف بس، لا أعلى.' },
+  press: { ar: 'ضغط الكتف', en: 'Shoulder Press', area: 's', m: ['shoulders', 'triceps'], mach: 'دمبلز أو جهاز Shoulder Press', eq: 'db', w: [3, 4, 5], per: 'يد',
+    A: { ...STAND, an: [100, -92], af: [98, -90] }, B: { ...STAND, an: [-88, -90], af: [-90, -92] },
+    tip: 'شدي البطن عشان ما يتقوس ظهرك.' },
+  pushdown: { ar: 'ترايسبس بالكيبل', en: 'Tricep Pushdown', area: 'a', m: ['triceps'], mach: 'كيبل بالحبل', w: [5, 7.5, 10],
+    props: [{ k: 'cable', post: ['sh', 46], pulley: ['sh', 34, 18], to: 'wN' }],
+    A: { t: -86, h: -84, an: [96, -40], af: [94, -42], ln: [92, 90], lf: [88, 90] },
+    B: { t: -86, h: -84, an: [96, 86], af: [94, 84], ln: [92, 90], lf: [88, 90] },
+    tip: 'الكوع ثابت جنبك.' },
+  curl: { ar: 'بايسبس بالدمبل', en: 'Bicep Curl', area: 'a', m: ['biceps'], mach: 'دمبلز', eq: 'db', w: [3, 4, 5], per: 'يد',
+    A: STAND, B: { ...STAND, an: [94, -78], af: [92, -76] }, tip: 'لا تتمرجحين بجسمك.' },
+  plank: { ar: 'بلانك', en: 'Plank', area: 'x', m: ['abs', 'shoulders'], mach: 'مات', hold: true, w: [0, 0, 0], r: ['٢٠ ث', '٣٠ ث', '٤٠ ث'],
+    A: { t: -12, h: -6, an: [90, 0], af: [90, 0], ln: [168, 168, 100], lf: [168, 168, 100] },
+    B: { t: -10, h: -4, an: [90, 0], af: [90, 0], ln: [170, 170, 100], lf: [170, 170, 100] }, tip: 'جسمك خط مستقيم.' },
+
+  goblet: { ar: 'سكوات بالدمبل', en: 'Goblet Squat', area: 'l', m: ['quads', 'gmax'], mach: 'دمبل واحد', eq: 'db1', w: [6, 8, 10],
+    A: { t: -90, h: -90, an: [62, -112], af: [60, -114], ln: [90, 90], lf: [90, 90] },
+    B: { t: -58, h: -60, an: [92, -80], af: [90, -82], ln: [18, 112], lf: [16, 114] }, tip: 'الركب باتجاه أصابع القدم.' },
+  legpress: { ar: 'ليق برس', en: 'Leg Press', area: 'l', m: ['quads', 'gmax', 'hams'], mach: 'جهاز Leg Press', w: [20, 30, 40], unit: 'كجم فوق وزن الجهاز', ground: ['hip'], elev: 26,
+    props: [{ k: 'seat', at: 'hip', back: true }, { k: 'sled', at: 'anN', ang: -45 }],
+    A: { t: -138, h: -120, an: [78, 30], af: [76, 28], ln: [-80, -10, -135], lf: [-78, -8, -133] },
+    B: { t: -138, h: -120, an: [78, 30], af: [76, 28], ln: [-45, -45, -135], lf: [-43, -43, -133] },
+    tip: 'القدم عالية = شغل أكثر على المؤخرة. لا تقفلين الركبة.' },
+  bulgarian: { ar: 'سكوات بلغاري', en: 'Bulgarian Split Squat', area: 'g', m: ['gmax', 'quads'], mach: 'بنش + دمبلز', eq: 'db', w: [0, 4, 6], per: 'يد', r: ['٨ لكل رجل', '١٠ لكل رجل', '١٠ لكل رجل'],
+    props: [{ k: 'bench', x0: ['toeN', -30], x1: ['toeN', 8], top: ['toeN', 2.5] }],
+    A: { t: -86, h: -86, an: [92, 92], af: [90, 90], ln: [128, 177, 157], lf: [76, 94] },
+    B: { t: -74, h: -80, an: [92, 92], af: [90, 90], ln: [103, 227, 207], lf: [12, 96] }, tip: 'ميلي لقدام شوي للمؤخرة.' },
+  legext: { ar: 'جهاز الفخذ الأمامي', en: 'Leg Extension', area: 'l', m: ['quads'], mach: 'جهاز Leg Extension', w: [10, 15, 20], ground: ['hip'], elev: 34,
+    props: [{ k: 'seat', at: 'hip', back: true }, { k: 'padF', at: 'anN' }],
+    A: { ...SEAT, ln: [0, 92], lf: [2, 94] }, B: { ...SEAT, ln: [0, 6], lf: [2, 8] }, tip: 'ثبتي فوق ثانية ونزلي ببطء.' },
+  adduction: { ar: 'جهاز ضم الرجلين', en: 'Hip Adduction', area: 'l', m: ['adductors'], mach: 'جهاز Hip Adduction', w: [20, 25, 30], view: 'front', r: ['١٢', '١٥', '١٥'],
+    FA: { seated: 1, legs: 32, arms: 12 }, FB: { seated: 1, legs: 5, arms: 12 }, pads: 'in', tip: 'ضمي ببطء ورجعي بتحكم.' },
+  calf: { ar: 'سمانة', en: 'Calf Raise', area: 'l', m: ['calves'], mach: 'دمبلز أو جهاز السمانة', eq: 'db', w: [0, 6, 8], per: 'يد', r: ['١٢', '١٥', '١٥'],
+    A: STAND, B: { ...STAND, ln: [90, 90, 36], lf: [90, 90, 36] }, tip: 'ثبتي فوق ثانية.' },
+
+  backext: { ar: 'ظهر ٤٥ للقلوتس', en: '45° Back Extension', area: 'g', m: ['gmax', 'hams', 'lowback'], mach: 'جهاز Hyperextension', w: [0, 0, 5], w2: 'صحن', ground: ['toeN', 'toeF', 'anN', 'anF'], elev: 16,
+    props: [{ k: 'hyper' }],
+    A: { t: -45, h: -40, an: [80, -80], af: [78, -82], ln: [135, 135], lf: [133, 133] },
+    B: { t: 72, h: 80, an: [197, 37], af: [195, 35], ln: [135, 135], lf: [133, 133] }, tip: 'اطلعي لخط الجسم بس، لا أعلى.' },
+  bridge: { ar: 'جسر بالدمبل', en: 'Weighted Glute Bridge', area: 'g', m: ['gmax', 'hams'], mach: 'مات + دمبل', w: [0, 10, 15], r: ['١٢', '١٢', '١٥'],
+    props: [{ k: 'barbell', at: 'hip', db: true }],
+    A: { t: 180, an: [16, -40], af: [14, -42], ...SUP_KNEES },
+    B: { t: 155, h: 172, an: [-6, -36], af: [-8, -38], ln: [-18, 82, 0], lf: [-16, 84, 0] }, tip: 'ادفعي من الكعب.' },
+  donkey: { ar: 'ركلة الحمار', en: 'Donkey Kicks', area: 'g', m: ['gmax', 'hams'], mach: 'مات + أثقال كاحل', w: [0, 1, 2], per: 'رجل', r: ['١٢ لكل رجل', '١٥ لكل رجل', '١٥ لكل رجل'],
+    A: QUAD, B: { ...QUAD, ln: [205, 275, 185] }, tip: 'لا تقوّسين أسفل ظهرك.' },
+  cablecrunch: { ar: 'كرنش بالكيبل', en: 'Cable Crunch', area: 'x', m: ['abs'], mach: 'كيبل بالحبل', w: [10, 15, 20], r: ['١٢', '١٥', '١٥'],
+    props: [{ k: 'cable', post: ['sh', 44], pulley: ['sh', 30, 14], to: 'wN' }],
+    A: { t: -80, h: -76, an: [-20, -150], af: [-22, -152], ln: [90, 180, 180], lf: [90, 180, 180] },
+    B: { t: 26, h: 52, an: [80, -40], af: [78, -42], ln: [90, 180, 180], lf: [90, 180, 180] }, tip: 'الحركة من البطن، الحوض ثابت.' },
+  legraise: { ar: 'رفع الرجلين', en: 'Leg Raise', area: 'x', m: ['abs'], mach: 'مات', w: [0, 0, 0], r: ['١٠', '١٢', '١٥'],
+    A: { t: 180, an: [2, 2], af: [2, 2], ln: [-6, -6, -6], lf: [-5, -5, -5] },
+    B: { t: 180, an: [2, 2], af: [2, 2], ln: [-86, -86, -86], lf: [-85, -85, -85] }, tip: 'أسفل ظهرك لازق بالأرض.' },
+
+  // ---- extra machines (library) ----
+  smithsquat: { ar: 'سكوات سميث', en: 'Smith Machine Squat', area: 'l', m: ['quads', 'gmax'], mach: 'جهاز Smith', w: [0, 10, 20], w2: 'فوق البار',
+    props: [{ k: 'smith' }],
+    A: { t: -90, h: -90, an: [150, -40], af: [148, -42], ln: [92, 88], lf: [90, 90] },
+    B: { t: -62, h: -66, an: [176, -14], af: [174, -16], ln: [16, 108], lf: [14, 110] }, tip: 'القدم قدام البار شوي.' },
+  seatedcurl: { ar: 'ثني الرجل جالسة', en: 'Seated Leg Curl', area: 'l', m: ['hams'], mach: 'جهاز Seated Leg Curl', w: [10, 15, 20], ground: ['hip'], elev: 34,
+    props: [{ k: 'seat', at: 'hip', back: true }, { k: 'kneepad', at: 'kN' }, { k: 'pad', at: 'anN' }],
+    A: { ...SEAT, ln: [0, 4], lf: [2, 6] }, B: { ...SEAT, ln: [0, 100], lf: [2, 102] }, tip: 'اسحبي لتحت ورجعي ببطء.' },
+  lunge: { ar: 'لانج خلفي', en: 'Reverse Lunge', area: 'l', m: ['quads', 'gmax'], mach: 'دمبلز', eq: 'db', w: [0, 4, 6], per: 'يد', r: ['٨ لكل رجل', '١٠ لكل رجل', '١٠ لكل رجل'],
+    A: STAND, B: { t: -84, h: -88, an: [92, 92], af: [90, 90], ln: [118, 172, 120], lf: [6, 92] }, tip: 'ثقلك على الرجل الأمامية.' },
+  sidelift: { ar: 'رفع الرجل جانبي', en: 'Side-Lying Leg Lift', area: 'g', m: ['gmed'], mach: 'مات + أثقال كاحل', w: [0, 1, 2], per: 'رجل', r: ['١٢ لكل جهة', '١٥ لكل جهة', '١٥ لكل جهة'],
+    A: { t: 0, h: 0, an: [174, 178], af: [-2, -2], ln: [180, 180, 180], lf: [180, 180, 180] },
+    B: { t: 0, h: 0, an: [196, 200], af: [-2, -2], ln: [208, 208, 208], lf: [180, 180, 180] }, tip: 'القدم تطالع قدام مو للسقف.' },
+  crunch: { ar: 'كرنش', en: 'Crunch', area: 'x', m: ['abs'], mach: 'مات', w: [0, 0, 0], r: ['١٢', '١٥', '٢٠'],
+    A: { t: 180, an: [2, 2], af: [2, 2], ...SUP_KNEES }, B: { t: 206, h: 214, an: [-14, -14], af: [-16, -16], ...SUP_KNEES }, tip: 'لا تسحبين رقبتك.' },
+  treadmill: { ar: 'مشي مائل', en: 'Incline Walk', area: 'k', m: ['gmax', 'calves'], mach: 'السير: ميلان ١٠ · سرعة ٤٫٥', w: [0, 0, 0], r: ['١٥ د', '٢٠ د', '٢٥ د'], cardio: true, tempo: 1.3, elev: 9,
+    props: [{ k: 'treadmill' }], A: WALK_A, B: WALK_B, tip: 'لا تمسكين اليد، خلي جسمك يشتغل.' },
+  stair: { ar: 'ستير ماستر', en: 'Stairmaster', area: 'k', m: ['gmax', 'quads'], mach: 'الدرج: مستوى ٤–٦', w: [0, 0, 0], r: ['١٠ د', '١٥ د', '٢٠ د'], cardio: true, tempo: 1.4, ground: ['anF', 'toeF'], elev: 12,
+    props: [{ k: 'stairs' }],
+    A: { t: -84, an: [40, -20], af: [44, -16], ln: [24, 104], lf: [92, 90] }, B: { t: -84, an: [44, -16], af: [40, -20], ln: [92, 90], lf: [24, 104] },
+    tip: 'ميلي لقدام شوي للمؤخرة.' },
+  bike: { ar: 'دراجة ثابتة', en: 'Stationary Bike', area: 'k', m: ['quads', 'gmax'], mach: 'الدراجة: مقاومة متوسطة', w: [0, 0, 0], r: ['١٠ د', '١٥ د', '٢٠ د'], cardio: true, tempo: 1, ground: ['hip'], elev: 62,
+    props: [{ k: 'bike' }],
+    A: { t: -70, h: -60, an: [14, 20], af: [16, 22], ln: [26, 104], lf: [74, 70] }, B: { t: -70, h: -60, an: [14, 20], af: [16, 22], ln: [74, 70], lf: [26, 104] },
+    tip: 'الركبة ما تنفرد كامل تحت.' },
+};
+
+const WARM = {
+  w_walk: { ar: 'مشي مائل أو دراجة', q: '٥ دقايق', m: ['quads', 'gmax'], tempo: 1.3, A: WALK_A, B: WALK_B },
+  w_swing: { ar: 'أرجحة الرجل', q: '١٠ لكل رجل', m: ['gmax', 'hams'], tempo: 1.6, ground: ['anF', 'toeF'],
+    A: { ...STAND, an: [120, 110], ln: [42, 52] }, B: { ...STAND, an: [60, 70], ln: [126, 128] } },
+  w_arms: { ar: 'دوران الكتف', q: '١٠ قدام · ١٠ خلف', m: ['shoulders'], tempo: 1.8,
+    A: { ...STAND, an: [-86, -88], af: [-92, -94] }, B: { ...STAND, an: [118, 120], af: [116, 118] } },
+  w_squat: { ar: 'سكوات بدون وزن', q: '١٥', m: ['quads', 'gmax'],
+    A: { ...STAND, an: [80, 40], af: [78, 38] }, B: { t: -58, h: -60, an: [6, 4], af: [4, 2], ln: [18, 112], lf: [16, 114] } },
+  w_bridge: { ar: 'جسر قلوتس', q: '١٥', m: ['gmax'], A: { t: 180, an: [2, 2], af: [2, 2], ...SUP_KNEES }, B: BRIDGE_UP },
+  w_catcow: { ar: 'قطة وجمل', q: '٨', m: ['lowback', 'back'], tempo: 3.2, A: { ...QUAD, t: -22, h: -58 }, B: { ...QUAD, t: -6, h: 40 } },
+};
+const STRETCH = {
+  s_ham: { ar: 'إطالة الخلفية', q: '٣٠ ثانية', m: ['hams', 'lowback'], hold: true, tempo: 4,
+    A: { t: -78, h: -70, an: [40, 20], af: [38, 18], ln: [0, 0, -90], lf: [2, 2, -88] },
+    B: { t: -26, h: -14, an: [8, 4], af: [10, 6], ln: [0, 0, -90], lf: [2, 2, -88] } },
+  s_quad: { ar: 'إطالة الفخذ الأمامي', q: '٣٠ ث لكل رجل', m: ['quads'], hold: true, tempo: 4, ground: ['anF', 'toeF'],
+    A: { ...STAND, an: [112, 64], ln: [98, 252, 162] }, B: { ...STAND, an: [116, 60], ln: [104, 258, 168] } },
+  s_knee: { ar: 'ضم الركبة للصدر', q: '٣٠ ث لكل رجل', m: ['gmax', 'lowback'], hold: true, tempo: 4,
+    A: { t: 180, an: [-58, -6], af: [-56, -4], ln: [236, -14, -104], lf: [0, 0, -90] },
+    B: { t: 180, an: [-64, -12], af: [-62, -10], ln: [228, -20, -110], lf: [0, 0, -90] } },
+  s_lunge: { ar: 'إطالة مقدمة الحوض', q: '٣٠ ث لكل جهة', m: ['quads', 'gmax'], hold: true, tempo: 4,
+    A: { t: -94, h: -92, an: [80, 30], af: [78, 28], ln: [118, 176, 180], lf: [12, 94] },
+    B: { t: -98, h: -96, an: [78, 26], af: [76, 24], ln: [124, 178, 182], lf: [4, 98] } },
+  s_child: { ar: 'وضعية الطفل', q: '٣٠ ثانية', m: ['back', 'lowback'], hold: true, tempo: 4,
+    A: { t: 20, h: 34, an: [2, 0], af: [4, 2], ln: [32, 180, 180], lf: [30, 180, 180] },
+    B: { t: 28, h: 40, an: [-2, -2], af: [0, 0], ln: [30, 180, 180], lf: [28, 180, 180] } },
+  s_cobra: { ar: 'الكوبرا للبطن', q: '٣٠ ثانية', m: ['abs'], hold: true, tempo: 4,
+    A: { t: -4, h: -4, an: [96, 40], af: [94, 38], ln: [180, 180, 180], lf: [180, 180, 180] },
+    B: { t: -28, h: -42, an: [96, 92], af: [94, 90], ln: [182, 182, 182], lf: [182, 182, 182] } },
+};
+const PILATES = {
+  p_hundred: { ar: 'المئة', en: 'The Hundred', q: '١٠ أنفاس', m: ['abs'], tempo: 0.7,
+    A: { t: 206, h: 216, an: [14, 14], af: [14, 14], ln: [-40, -40, -40], lf: [-38, -38, -38] },
+    B: { t: 206, h: 216, an: [28, 28], af: [28, 28], ln: [-40, -40, -40], lf: [-38, -38, -38] } },
+  p_rollup: { ar: 'رول أب', en: 'Roll Up', q: '٦', m: ['abs'], tempo: 3.6,
+    A: { t: 180, an: [178, 178], af: [176, 176], ln: [0, 0, -90], lf: [2, 2, -88] },
+    B: { t: 324, h: 334, an: [366, 366], af: [364, 364], ln: [0, 0, -90], lf: [2, 2, -88] } },
+  p_single: { ar: 'مد رجل وحدة', en: 'Single Leg Stretch', q: '١٠ لكل رجل', m: ['abs'], tempo: 1.3,
+    A: { t: 204, h: 214, an: [-34, -6], af: [-30, -4], ln: [236, 4, -60], lf: [-26, -26, -26] },
+    B: { t: 204, h: 214, an: [-30, -4], af: [-34, -6], ln: [-26, -26, -26], lf: [236, 4, -60] } },
+  p_teaser: { ar: 'تيزر', en: 'Teaser', q: '٥', m: ['abs'], tempo: 3.4,
+    A: { t: 180, an: [178, 178], af: [176, 176], ln: [-4, -4, -4], lf: [-3, -3, -3] },
+    B: { t: 238, h: 246, an: [326, 326], af: [324, 324], ln: [-42, -42, -42], lf: [-40, -40, -40] } },
+  p_circle: { ar: 'رفع رجل ممدودة', en: 'Single Leg Raise', q: '٨ لكل رجل', m: ['abs', 'quads'], tempo: 2.2,
+    A: { t: 180, an: [2, 2], af: [2, 2], ln: [-84, -84, -84], lf: [0, 0, -90] },
+    B: { t: 180, an: [2, 2], af: [2, 2], ln: [-30, -30, -30], lf: [0, 0, -90] } },
+  p_bridge: { ar: 'جسر الكتف', en: 'Shoulder Bridge', q: '٥ لكل رجل', m: ['gmax', 'hams'], tempo: 2.4,
+    A: { ...BRIDGE_UP, ln: [-22, -22, -22] }, B: { ...BRIDGE_UP, ln: [-82, -82, -82] } },
+  p_swim: { ar: 'السباحة', en: 'Swimming', q: '٢٠ ركلة', m: ['back', 'gmax', 'lowback'], tempo: 0.9,
+    A: { t: -8, h: -12, an: [-14, -14], af: [6, 6], ln: [194, 194, 194], lf: [176, 176, 176] },
+    B: { t: -8, h: -12, an: [6, 6], af: [-14, -14], ln: [176, 176, 176], lf: [194, 194, 194] } },
+  p_swan: { ar: 'البجعة', en: 'Swan', q: '٥', m: ['back', 'lowback'], tempo: 3,
+    A: { t: -4, h: -4, an: [96, 40], af: [94, 38], ln: [180, 180, 180], lf: [180, 180, 180] },
+    B: { t: -30, h: -46, an: [96, 92], af: [94, 90], ln: [182, 182, 182], lf: [182, 182, 182] } },
+};
+Object.assign(EX, WARM, STRETCH, PILATES);
+
+const MUSCLES = {
+  gmax: 'المؤخرة', gmed: 'جوانب المؤخرة', hams: 'الخلفية', quads: 'الفخذ الأمامي', adductors: 'الفخذ الداخلي', calves: 'السمانة',
+  abs: 'البطن', obliques: 'الخواصر', lowback: 'أسفل الظهر', back: 'الظهر', chest: 'الصدر', shoulders: 'الكتف', biceps: 'البايسبس', triceps: 'الترايسبس',
+};
+const AREAS = [['g', 'قلوتس'], ['l', 'أرجل'], ['b', 'ظهر'], ['c', 'صدر'], ['s', 'كتف'], ['a', 'ذراعين'], ['x', 'بطن'], ['k', 'كارديو']];
+
+const DAYS = [
+  { title: 'قلوتس وخلفية', warm: 10, eat: true, cardio: '١٠ د مشي مائل (اختياري)', list: ['hipthrust', 'rdl', 'kickback', 'abduction', 'legcurl'] },
+  { title: 'ظهر، صدر، كتف وذراعين', warm: 5, cardio: '٢٠ د مشي مائل', list: ['pulldown', 'cablerow', 'chestpress', 'lateral', 'press', 'pushdown', 'curl'] },
+  { title: 'أرجل وقلوتس', warm: 10, eat: true, cardio: 'بدون كارديو', list: ['goblet', 'legpress', 'bulgarian', 'legext', 'adduction', 'calf'] },
+  { title: 'بطن وقلوتس', warm: 8, cardio: '٢٠ د ستير ماستر', list: ['backext', 'bridge', 'donkey', 'cablecrunch', 'legraise', 'plank'] },
+];
+
+if (typeof module !== 'undefined' && module.exports) module.exports = { SEG, R, norm, lerpPose, solve, bottom, bbox, EX, DAYS };
+
+// ---- Canvas renderer: female mannequin + gym equipment, target muscles glow ----
+const WORLD = { w: 250, h: 196, floor: 172 };
+const exCache = {};
+function placeOf(ex, S) { return (ex.elev || 0); }
+function prep(id) {
+  if (exCache[id]) return exCache[id];
+  const ex = EX[id];
+  if (ex.view === 'front') {
+    const P = (exCache[id] = { ex, ref: {} });
+    const rec = recorder();
+    for (const k of [0, 0.5, 1]) drawFront(rec, id, 0, { k });
+    const b = rec.box, y1 = WORLD.floor + 9;
+    let x0 = b[0] - 12, x1 = b[2] + 12; const w = Math.max(x1 - x0, 130), cxm = (x0 + x1) / 2;
+    P.box = [cxm - w / 2, Math.min(b[1] - 12, y1 - 95), cxm + w / 2, y1];
+    return P;
+  }
+  const A = norm(ex.A), B = norm(ex.B);
+  const SA = solve(A), SB = solve(B);
+  const bA = bbox(SA), bB = bbox(SB);
+  const cx = (Math.min(bA[0], bB[0]) + Math.max(bA[1], bB[1])) / 2;
+  const dyA = WORLD.floor - (ex.elev || 0) - bottom(SA, ex.ground);
+  const dx = WORLD.w / 2 - cx;
+  // A-pose points in world space: fixed anchors for machines
+  const ref = {};
+  for (const k in SA.pt) ref[k] = [SA.pt[k][0] + dx, SA.pt[k][1] + dyA];
+  ref.legDirN = dir(A.ln[0]);
+  const P = (exCache[id] = { ex, A, B, dx, ref });
+  // measure everything the scene draws (figure + machine) to frame it tightly
+  const rec = recorder();
+  for (const k of [0, 0.25, 0.5, 0.75, 1]) (ex.view === 'front' ? drawFront : drawFigure)(rec, id, 0, { k });
+  const b = rec.box;
+  let x0 = b[0] - 12, x1 = b[2] + 12, y0 = b[1] - 12, y1 = WORLD.floor + 9;
+  const w = Math.max(x1 - x0, 130), h = Math.max(y1 - y0, 95);
+  const cxm = (x0 + x1) / 2; x0 = cxm - w / 2; x1 = cxm + w / 2; y0 = y1 - h;
+  P.box = [x0, y0, x1, y1];
+  return P;
+}
+function recorder() {
+  const box = [Infinity, Infinity, -Infinity, -Infinity];
+  const pt = (x, y, r = 0) => { box[0] = Math.min(box[0], x - r); box[1] = Math.min(box[1], y - r); box[2] = Math.max(box[2], x + r); box[3] = Math.max(box[3], y + r); };
+  let lw = 0;
+  const c = {
+    box, save() {}, restore() {}, beginPath() {}, closePath() {}, stroke() {}, fill() {},
+    set lineWidth(v) { lw = v; }, get lineWidth() { return lw; },
+    moveTo(x, y) { pt(x, y, lw / 2); }, lineTo(x, y) { pt(x, y, lw / 2); },
+    quadraticCurveTo(a, b, x, y) { pt(x, y, lw / 2); },
+    arc(x, y, r) { pt(x, y, r); }, ellipse(x, y, rx, ry) { pt(x, y, Math.max(rx, ry)); },
+    arcTo(x1, y1, x2, y2) { pt(x1, y1); pt(x2, y2); },
+    fillRect(x, y, w, h) { pt(x, y); pt(x + w, y + h); }, clearRect() {}, translate() {}, scale() {},
+  };
+  return c;
+}
+function phaseK(id, t) {
+  const ex = EX[id];
+  const period = (ex.tempo || 2.8) * 1000;
+  const x = (t % period) / period;
+  if (ex.hold) return 0.5 - 0.5 * Math.cos(x * Math.PI * 2);
+  const k = x < 0.45 ? x / 0.45 : x < 0.6 ? 1 : 1 - (x - 0.6) / 0.4;
+  return 0.5 - 0.5 * Math.cos(Math.PI * k);
+}
+
+const COL = {
+  skin: '#ffffff', skinEdge: '#9a6f86', far: '#e6d2dc', farEdge: '#977688',
+  cloth: '#3f1d36', clothFar: '#33172c', stripe: '#ff8fb6', hair: '#3a2230', red: '#ff1f56',
+  mat: '#e8a8bf', matEdge: '#f5c9d8', steel: '#7e6474', steelLite: '#a68d9b', pad: '#5a2a49', plate: '#4a2a3e', cable: '#5d4453',
+};
+
+function seg(ctx, a, b, w, col, edge) {
+  ctx.lineCap = 'round';
+  if (edge) { ctx.strokeStyle = edge; ctx.lineWidth = w + 1.6; ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke(); }
+  ctx.strokeStyle = col; ctx.lineWidth = w;
+  ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+}
+function lerpP(a, b, k) { return [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k]; }
+function off(p, n, s) { return [p[0] + n[0] * s, p[1] + n[1] * s]; }
+function unit(a, b) { const dx = b[0] - a[0], dy = b[1] - a[1]; const l = Math.hypot(dx, dy) || 1; return [dx / l, dy / l]; }
+function legFront(a, b) { const u = unit(a, b); return [u[1], -u[0]]; }
+function roundRect(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+
+function drawProps(ctx, P, cur, layer) {
+  const F = WORLD.floor;
+  const R0 = P.ref;
+  const at = (spec) => [R0[spec[0]][0] + (spec[1] || 0), R0[spec[0]][1] + (spec[2] || 0)];
+  for (const pr of P.ex.props || []) {
+    if (layer === 'back') {
+      if (pr.k === 'bench') {
+        const x0 = at(pr.x0)[0], x1 = at(pr.x1)[0], top = R0[pr.top[0]][1] + pr.top[1];
+        ctx.fillStyle = COL.steel;
+        ctx.fillRect(x0 + 5, top + 4, 4, F - top - 4); ctx.fillRect(x1 - 9, top + 4, 4, F - top - 4);
+        ctx.fillStyle = COL.pad; roundRect(ctx, x0, top, x1 - x0, 8, 3); ctx.fill();
+      } else if (pr.k === 'seat') {
+        const h = R0.hip, top = h[1] + R.hip;
+        ctx.fillStyle = COL.steel; ctx.fillRect(h[0] - 3, top + 6, 6, F - top - 6);
+        ctx.fillRect(h[0] - 18, F - 4, 36, 4);
+        ctx.fillStyle = COL.pad; roundRect(ctx, h[0] - 18, top, 34, 8, 3); ctx.fill();
+        if (pr.back) {
+          const s = cur.sh, hp = cur.hip, fr = cur.front;
+          const a = off(hp, fr, -12), b = off(off(s, fr, -12), cur.d, 8);
+          seg(ctx, a, b, 9, COL.pad);
+          seg(ctx, off(a, cur.d, 4), [a[0] + 4, F], 4, COL.steel);
+        }
+      } else if (pr.k === 'cable') {
+        const post = at(pr.post);
+        const py = Array.isArray(pr.pulley[2]) ? R0[pr.pulley[2][0]][1] + pr.pulley[2][1] : pr.pulley[2];
+        const pul = [R0[pr.pulley[0]][0] + pr.pulley[1], py];
+        const topY = Math.min(py, 22) - 6;
+        // tower
+        ctx.fillStyle = COL.steel; ctx.fillRect(post[0] - 3, topY, 6, F - topY);
+        ctx.fillRect(post[0] - 14, F - 4, 28, 4);
+        ctx.fillStyle = COL.plate; roundRect(ctx, post[0] - 2 + (post[0] > pul[0] ? 4 : -12), F - 46, 10, 40, 2); ctx.fill();
+        if (Math.abs(post[0] - pul[0]) > 2) seg(ctx, [post[0], py], pul, 4, COL.steel);
+        ctx.fillStyle = COL.steelLite; ctx.beginPath(); ctx.arc(pul[0], pul[1], 4, 0, 7); ctx.fill();
+        P._pulley = pul;
+      } else if (pr.k === 'footplate') {
+        const a = R0.anN, u = R0.legDirN;
+        const p = [a[0] + 7, a[1]];
+        seg(ctx, [p[0], p[1] - 16], [p[0], p[1] + 10], 5, COL.pad);
+        seg(ctx, [p[0] + 2, p[1] + 10], [p[0] + 2, F], 4, COL.steel);
+      } else if (pr.k === 'sled') {
+        const a0 = R0.anN, u = dir(pr.ang);
+        seg(ctx, off(a0, u, -22), off(a0, u, 70), 4, COL.steelLite);
+        seg(ctx, off(a0, u, -16), [off(a0, u, -16)[0], F], 4, COL.steel);
+      } else if (pr.k === 'smith') {
+        const x = R0.sh[0] - 2;
+        for (const dxr of [-16, 22]) { ctx.fillStyle = COL.steelLite; ctx.fillRect(x + dxr, 8, 4, F - 8); }
+        ctx.fillStyle = COL.steel; ctx.fillRect(x - 22, F - 4, 50, 4); ctx.fillRect(x - 18, 6, 46, 4);
+      } else if (pr.k === 'treadmill') {
+        const h = R0.hip, xb = h[0] - 62, xf = h[0] + 52;
+        ctx.fillStyle = COL.pad; ctx.beginPath(); ctx.moveTo(xb, F); ctx.lineTo(xf, F); ctx.lineTo(xf, F - 12); ctx.lineTo(xb, F - 4); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = COL.steelLite; ctx.beginPath(); ctx.moveTo(xb, F - 4); ctx.lineTo(xf, F - 12); ctx.lineTo(xf, F - 9.5); ctx.lineTo(xb, F - 1.5); ctx.closePath(); ctx.fill();
+        seg(ctx, [xf - 4, F - 10], [xf + 6, 70], 5, COL.steel);
+        seg(ctx, [xf + 6, 70], [xf - 14, 82], 4, COL.steel);
+        ctx.fillStyle = COL.plate; roundRect(ctx, xf - 4, 60, 16, 12, 3); ctx.fill();
+      } else if (pr.k === 'stairs') {
+        const a = R0.anF, xs = a[0] - 34;
+        ctx.fillStyle = COL.pad;
+        for (let i = 0; i < 4; i++) { roundRect(ctx, xs + i * 16, F - 12 - i * 14, 52 - i * 2, 6, 2); ctx.fill(); }
+        ctx.fillStyle = COL.steel; ctx.fillRect(xs - 6, F - 12, 6, 12);
+        seg(ctx, [xs + 70, F], [xs + 82, 74], 5, COL.steel);
+        seg(ctx, [xs + 82, 74], [xs + 52, 80], 4, COL.steelLite);
+      } else if (pr.k === 'bike') {
+        const h = R0.hip, top = h[1] + R.hip;
+        const fw = [h[0] + 52, F - 20];
+        seg(ctx, [h[0] - 2, top + 4], [h[0] + 6, F - 26], 5, COL.steel);
+        seg(ctx, [h[0] + 6, F - 26], fw, 5, COL.steel);
+        seg(ctx, fw, [R0.wN[0] + 4, R0.wN[1] + 6], 5, COL.steel);
+        seg(ctx, [h[0] - 22, F - 2], [fw[0] + 20, F - 2], 5, COL.steel);
+        ctx.fillStyle = COL.plate; ctx.beginPath(); ctx.arc(fw[0], fw[1], 16, 0, 7); ctx.fill();
+        ctx.fillStyle = COL.steelLite; ctx.beginPath(); ctx.arc(fw[0], fw[1], 4, 0, 7); ctx.fill();
+        ctx.fillStyle = COL.pad; roundRect(ctx, h[0] - 14, top, 26, 7, 3); ctx.fill();
+        seg(ctx, [R0.wN[0] - 4, R0.wN[1]], [R0.wN[0] + 8, R0.wN[1] + 2], 5, COL.pad);
+      } else if (pr.k === 'hyper') {
+        const h = R0.hip, k = R0.kN, an = R0.anN;
+        const v = unit(h, k), fr = legFront(h, k);
+        const p1 = off(off(h, v, 3), fr, 11), p2 = off(off(h, v, 24), fr, 11);
+        const f1 = off(off(an, v, 4), fr, -2), f2 = off(off(an, v, 4), fr, 14);
+        seg(ctx, p2, [p2[0] + 6, F], 5, COL.steel);
+        seg(ctx, f2, [f2[0], F], 5, COL.steel);
+        seg(ctx, [p2[0] + 6, F - 2], [f2[0] - 10, F - 2], 4, COL.steel);
+        seg(ctx, f1, f2, 5, COL.pad);
+        seg(ctx, p1, p2, 10, COL.pad);
+      }
+    } else {
+      if (pr.k === 'cable' && P._pulley) {
+        const to = cur.pt[pr.to];
+        ctx.strokeStyle = COL.cable; ctx.lineWidth = 1.4; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(P._pulley[0], P._pulley[1]); ctx.lineTo(to[0], to[1]); ctx.stroke();
+        if (pr.bar) seg(ctx, [to[0] - 2, to[1] - 2], [to[0] + 3, to[1] + 1], 5, COL.plate);
+        else { ctx.fillStyle = COL.plate; ctx.beginPath(); ctx.arc(to[0], to[1], 3, 0, 7); ctx.fill(); }
+      } else if (pr.k === 'pad') {
+        const a = cur.pt.anN, u = legFront(cur.pt.kN, a);
+        ctx.fillStyle = COL.pad; ctx.beginPath(); const c = off(a, u, -8); ctx.arc(c[0], c[1], 5.5, 0, 7); ctx.fill();
+      } else if (pr.k === 'padF') {
+        const a = cur.pt.anN, u = legFront(cur.pt.kN, a);
+        ctx.fillStyle = COL.pad; ctx.beginPath(); const c = off(a, u, 8); ctx.arc(c[0], c[1], 5.5, 0, 7); ctx.fill();
+        seg(ctx, c, R0.kN, 3, COL.steel);
+      } else if (pr.k === 'handles') {
+        const w = cur.pt.wN; seg(ctx, [w[0], w[1] - 6], [w[0], w[1] + 6], 4.5, COL.plate);
+        seg(ctx, [w[0] + 2, w[1]], [R0.sh[0] + 64, R0.sh[1] - 20], 3, COL.steelLite);
+      } else if (pr.k === 'smith') {
+        const sh = cur.sh, c = off(off(sh, cur.front, -6), cur.d, -1);
+        seg(ctx, [R0.sh[0] - 18, c[1]], [R0.sh[0] + 26, c[1]], 3, COL.steel);
+        ctx.fillStyle = COL.plate; ctx.beginPath(); ctx.arc(c[0], c[1], 13, 0, 7); ctx.fill();
+        ctx.fillStyle = COL.steelLite; ctx.beginPath(); ctx.arc(c[0], c[1], 3, 0, 7); ctx.fill();
+      } else if (pr.k === 'kneepad') {
+        const kk = R0.kN; ctx.fillStyle = COL.pad; ctx.beginPath(); ctx.arc(kk[0] - 4, kk[1] - 11, 5.5, 0, 7); ctx.fill();
+        seg(ctx, [kk[0] - 4, kk[1] - 11], [R0.hip[0] + 2, R0.hip[1] + 14], 3, COL.steel);
+      } else if (pr.k === 'barbell') {
+        const c = off(cur.hip, cur.front, pr.db ? 9 : 12);
+        if (pr.db) {
+          seg(ctx, off(c, cur.d, -6), off(c, cur.d, 6), 3, COL.steel);
+          ctx.fillStyle = COL.plate; for (const s of [-6, 6]) { const q = off(c, cur.d, s); ctx.beginPath(); ctx.arc(q[0], q[1], 5.5, 0, 7); ctx.fill(); }
+        } else {
+          ctx.fillStyle = COL.plate; ctx.beginPath(); ctx.arc(c[0], c[1], 14, 0, 7); ctx.fill();
+          ctx.fillStyle = COL.steelLite; ctx.beginPath(); ctx.arc(c[0], c[1], 3, 0, 7); ctx.fill();
+        }
+      } else if (pr.k === 'sled') {
+        const a = cur.pt.anN, u = dir(pr.ang), n = [-u[1], u[0]];
+        const c = off(a, u, 6);
+        seg(ctx, off(c, n, -20), off(c, n, 20), 6, COL.pad);
+      }
+    }
+  }
+}
+
+function drawFigure(ctx, id, t, opts = {}) {
+  const P = prep(id);
+  const k = opts.k ?? phaseK(id, t);
+  const pose = lerpPose(P.A, P.B, k);
+  const S = solve(pose);
+  const dy = WORLD.floor - (P.ex.elev || 0) - bottom(S, P.ex.ground);
+  const tr = (p) => [p[0] + P.dx, p[1] + dy];
+  const cur = { pt: {}, hip: tr(S.hip), sh: tr(S.sh), d: S.d, front: S.front };
+  for (const key in S.pt) cur.pt[key] = tr(S.pt[key]);
+  const m = new Set(P.ex.m);
+
+  ctx.save();
+  drawProps(ctx, P, cur, 'back');
+
+  const limbs = (side, far) => {
+    const sk = far ? COL.far : COL.skin, ed = far ? COL.farEdge : COL.skinEdge;
+    const L = S['l' + side], Aa = S['a' + side];
+    return {
+      leg() {
+        const h = tr(L.h), kn = tr(L.k), an = tr(L.an), toe = tr(L.toe);
+        seg(ctx, an, toe, 5.5, sk, ed);
+        seg(ctx, kn, an, 9, sk, ed);
+        seg(ctx, h, kn, 13, sk, ed);
+        seg(ctx, h, lerpP(h, kn, 0.55), 14.2, far ? COL.clothFar : COL.cloth);
+      },
+      arm() {
+        const s = tr(Aa.s), e = tr(Aa.e), w = tr(Aa.w);
+        seg(ctx, s, e, 7.5, sk, ed);
+        seg(ctx, e, w, 6.2, sk, ed);
+        ctx.fillStyle = sk; ctx.beginPath(); ctx.arc(w[0], w[1], 3.8, 0, 7); ctx.fill();
+        if (P.ex.eq === 'db' || (P.ex.eq === 'db1' && !far)) dumbbell(ctx, w, unit(e, w));
+      },
+    };
+  };
+  const far = limbs('f', true), near = limbs('n', false);
+  far.arm(); far.leg();
+
+  const hip = cur.hip, sh = cur.sh, d = S.d, fr = S.front;
+  const hd = tr(S.head);
+  // hips + glutes (wider, rounder)
+  const glute = off(off(hip, fr, -6.5), d, 2);
+  ctx.fillStyle = COL.cloth; ctx.beginPath(); ctx.arc(glute[0], glute[1], 10.5, 0, 7); ctx.fill();
+  // torso with a waist
+  seg(ctx, hip, off(hip, d, 22), 18, COL.skin, COL.skinEdge);
+  seg(ctx, off(hip, d, 22), sh, 17, COL.skin, COL.skinEdge);
+  seg(ctx, off(hip, d, 20), off(hip, d, 24), 15, COL.skin);
+  seg(ctx, hip, off(hip, d, 12), 21, COL.cloth); // leggings waistband
+  seg(ctx, off(hip, d, 31), off(hip, d, 43), 18.5, COL.cloth); // sports top
+  const bust = off(off(hip, d, 36.5), fr, 7.5);
+  ctx.fillStyle = COL.cloth; ctx.beginPath(); ctx.arc(bust[0], bust[1], 5.6, 0, 7); ctx.fill();
+  ctx.strokeStyle = COL.stripe; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
+  ctx.beginPath(); const s1 = off(off(hip, d, 11), fr, -8), s2 = off(off(hip, d, 11), fr, 8); ctx.moveTo(s1[0], s1[1]); ctx.lineTo(s2[0], s2[1]); ctx.stroke();
+  // neck + head + ponytail
+  seg(ctx, sh, lerpP(sh, hd, 0.5), 6.5, COL.skin, COL.skinEdge);
+  const hf = [-S.hd[1], S.hd[0]];
+  const pt0 = off(off(hd, S.hd, 3), hf, -7.5);
+  const fl = WORLD.floor - 2.5;
+  const lying = pt0[1] + 12 > fl;
+  const side = Math.sign(-hf[0] || -S.hd[0] || 1);
+  const pt1 = lying ? [pt0[0] - S.hd[0] * 5, Math.min(pt0[1] + 5, fl)] : [pt0[0] - hf[0] * 5, pt0[1] + 9];
+  const pt2 = lying ? [pt0[0] - S.hd[0] * 14 + side * 2, fl] : [pt0[0] - hf[0] * 6, pt0[1] + 17];
+  ctx.strokeStyle = COL.hair; ctx.lineCap = 'round';
+  ctx.lineWidth = 6.5; ctx.beginPath(); ctx.moveTo(pt0[0], pt0[1]); ctx.quadraticCurveTo(pt1[0], pt1[1], pt2[0], pt2[1]); ctx.stroke();
+  ctx.fillStyle = COL.skinEdge; ctx.beginPath(); ctx.arc(hd[0], hd[1], 9.8, 0, 7); ctx.fill();
+  ctx.fillStyle = COL.skin; ctx.beginPath(); ctx.arc(hd[0], hd[1], 9, 0, 7); ctx.fill();
+  // hair cap
+  ctx.fillStyle = COL.hair; ctx.beginPath();
+  const ang = Math.atan2(S.hd[1], S.hd[0]);
+  ctx.arc(hd[0], hd[1], 9.6, ang - Math.PI * 0.95, ang + Math.PI * 0.12); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = COL.stripe; ctx.beginPath(); ctx.arc(pt0[0], pt0[1], 2.4, 0, 7); ctx.fill();
+
+  near.leg(); near.arm();
+  drawProps(ctx, P, cur, 'front');
+
+  if (opts.highlight !== false) {
+    ctx.shadowColor = 'rgba(255,31,86,.75)'; ctx.shadowBlur = 7;
+    const glow = (a, b, w, alpha = 0.92) => { ctx.globalAlpha = alpha; ctx.lineCap = 'round'; ctx.strokeStyle = COL.red; ctx.lineWidth = w; ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke(); };
+    const dot = (p, r, alpha = 0.92) => { ctx.globalAlpha = alpha; ctx.fillStyle = COL.red; ctx.beginPath(); ctx.arc(p[0], p[1], r, 0, 7); ctx.fill(); };
+    if (m.has('gmax')) dot(glute, 8.5);
+    if (m.has('gmed')) dot(off(off(hip, fr, -2), d, 11), 4.8);
+    for (const [side, al] of [['f', 0.5], ['n', 0.92]]) {
+      const L = S['l' + side], Aa = S['a' + side];
+      const h = tr(L.h), kn = tr(L.k), an = tr(L.an);
+      const lf = legFront(h, kn), sf = legFront(kn, an);
+      if (m.has('quads')) glow(off(lerpP(h, kn, 0.25), lf, 3), off(lerpP(h, kn, 0.85), lf, 3), 6, al);
+      if (m.has('hams')) glow(off(lerpP(h, kn, 0.32), lf, -3), off(lerpP(h, kn, 0.85), lf, -3), 6, al);
+      if (m.has('calves')) glow(off(lerpP(kn, an, 0.15), sf, -2.5), off(lerpP(kn, an, 0.55), sf, -2.5), 5, al);
+      const s = tr(Aa.s), e = tr(Aa.e);
+      const af = legFront(s, e);
+      if (m.has('biceps')) glow(off(lerpP(s, e, 0.25), af, 1.6), off(lerpP(s, e, 0.85), af, 1.6), 4, al);
+      if (m.has('triceps')) glow(off(lerpP(s, e, 0.2), af, -1.6), off(lerpP(s, e, 0.85), af, -1.6), 4, al);
+    }
+    if (m.has('abs')) glow(off(off(hip, d, 9), fr, 6), off(off(hip, d, 28), fr, 6), 5.5);
+    if (m.has('obliques')) glow(off(hip, d, 13), off(hip, d, 26), 4.5, 0.7);
+    if (m.has('lowback')) glow(off(off(hip, d, 8), fr, -6.5), off(off(hip, d, 19), fr, -6.5), 5);
+    if (m.has('back')) glow(off(off(hip, d, 21), fr, -6.5), off(off(hip, d, 40), fr, -6.5), 6);
+    if (m.has('chest')) glow(off(off(hip, d, 34), fr, 8), off(off(hip, d, 41), fr, 8), 6);
+    if (m.has('shoulders')) dot(off(sh, d, -2), 5.2);
+  }
+  ctx.restore();
+}
+function dumbbell(ctx, w, u) {
+  const n = [-u[1], u[0]];
+  const a = off(w, n, -7), b = off(w, n, 7);
+  ctx.lineCap = 'butt';
+  ctx.strokeStyle = COL.steel; ctx.lineWidth = 2.4; ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+  for (const p of [a, b]) {
+    ctx.strokeStyle = COL.plate; ctx.lineWidth = 6.5;
+    const p1 = off(p, u, -4.5), p2 = off(p, u, 4.5);
+    ctx.beginPath(); ctx.moveTo(p1[0], p1[1]); ctx.lineTo(p2[0], p2[1]); ctx.stroke();
+  }
+}
+
+function drawScene(ctx, W, H, id, t, opts = {}) {
+  const P = prep(id);
+  const [x0, y0, x1, y1] = P.box;
+  const bw = x1 - x0, bh = y1 - y0;
+  const s = Math.min(W / bw, H / bh);
+  ctx.clearRect(0, 0, W, H);
+  ctx.save();
+  ctx.translate((W - bw * s) / 2 - x0 * s, (H - bh * s) / 2 - y0 * s);
+  ctx.scale(s, s);
+  const ext = (W / s - bw) / 2;
+  ctx.fillStyle = 'rgba(120,40,80,.10)';
+  ctx.beginPath(); ctx.ellipse((x0 + x1) / 2, WORLD.floor + 5, bw / 2, 5, 0, 0, 7); ctx.fill();
+  ctx.fillStyle = COL.mat; roundRect(ctx, x0 - ext + 6, WORLD.floor - 1, bw + ext * 2 - 12, 5, 2.5); ctx.fill();
+  (P.ex.view === 'front' ? drawFront : drawFigure)(ctx, id, t, opts);
+  ctx.restore();
+}
+
+// ---- front-view mannequin (abduction / adduction / lateral raise / pec deck) ----
+function drawFront(ctx, id, t, opts = {}) {
+  const ex = EX[id];
+  const k = opts.k ?? phaseK(id, t);
+  const L = (a, b) => (a ?? 0) + ((b ?? 0) - (a ?? 0)) * k;
+  const A = ex.FA, B = ex.FB;
+  const seated = A.seated, legs = L(A.legs, B.legs), arms = L(A.arms, B.arms), pec = A.pec != null ? L(A.pec, B.pec) : null;
+  const F = WORLD.floor, cx = WORLD.w / 2;
+  const hipY = seated ? F - 62 : F - 82;
+  const shY = hipY - 48, headY = shY - 19;
+  const m = new Set(ex.m);
+  const rad = (d) => d * Math.PI / 180;
+  ctx.save();
+  // machine
+  if (seated) {
+    ctx.fillStyle = COL.pad; roundRect(ctx, cx - 24, shY - 14, 48, 66, 8); ctx.fill();
+    roundRect(ctx, cx - 26, hipY + 6, 52, 9, 3); ctx.fill();
+    ctx.fillStyle = COL.steel; ctx.fillRect(cx - 3, hipY + 15, 6, F - hipY - 15); ctx.fillRect(cx - 34, F - 4, 68, 4);
+  }
+  // legs
+  const legPts = [];
+  for (const sd of [-1, 1]) {
+    const h = [cx + sd * 10, hipY + 4];
+    let kn, an;
+    if (seated) { kn = [h[0] + sd * Math.sin(rad(legs)) * 40, hipY + 14]; an = [kn[0] + sd * 2, F - 6]; }
+    else { const d = [sd * Math.sin(rad(legs)), Math.cos(rad(legs))]; kn = [h[0] + d[0] * 40, h[1] + d[1] * 40]; an = [kn[0] + d[0] * 38, F - 6]; }
+    legPts.push({ sd, h, kn, an });
+    seg(ctx, an, [an[0] + sd * 4, an[1] + 2], 6, COL.skin, COL.skinEdge);
+    seg(ctx, kn, an, 9.5, COL.skin, COL.skinEdge);
+    seg(ctx, h, kn, 14, COL.skin, COL.skinEdge);
+    seg(ctx, h, lerpP(h, kn, seated ? 0.9 : 0.55), 14.5, COL.cloth);
+  }
+  // pads on knees
+  if (ex.pads === 'out' || ex.pads === 'in') for (const p of legPts) {
+    const x = p.kn[0] + p.sd * (ex.pads === 'out' ? 10 : -10);
+    ctx.fillStyle = COL.pad; roundRect(ctx, x - 4, p.kn[1] - 12, 8, 26, 3); ctx.fill();
+  }
+  // torso
+  ctx.fillStyle = COL.skinEdge; ctx.beginPath();
+  const tor = [[cx - 16, shY], [cx + 16, shY], [cx + 11, hipY - 22], [cx + 17, hipY + 6], [cx - 17, hipY + 6], [cx - 11, hipY - 22]];
+  const poly = (pts, inset) => { ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.closePath(); };
+  poly(tor); ctx.fill();
+  ctx.fillStyle = COL.skin; ctx.save(); ctx.translate(cx, (shY + hipY) / 2); ctx.scale(0.94, 0.97); ctx.translate(-cx, -(shY + hipY) / 2); poly(tor); ctx.fill(); ctx.restore();
+  ctx.fillStyle = COL.cloth; ctx.beginPath(); ctx.moveTo(cx - 17, hipY - 4); ctx.lineTo(cx + 17, hipY - 4); ctx.lineTo(cx + 18, hipY + 8); ctx.lineTo(cx - 18, hipY + 8); ctx.closePath(); ctx.fill();
+  roundRect(ctx, cx - 15, shY + 5, 30, 15, 6); ctx.fill();
+  ctx.strokeStyle = COL.stripe; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(cx - 16, hipY - 1); ctx.lineTo(cx + 16, hipY - 1); ctx.stroke();
+  // neck/head/hair
+  seg(ctx, [cx, shY], [cx, headY + 6], 7, COL.skin, COL.skinEdge);
+  ctx.fillStyle = COL.skinEdge; ctx.beginPath(); ctx.arc(cx, headY, 10.6, 0, 7); ctx.fill();
+  ctx.fillStyle = COL.skin; ctx.beginPath(); ctx.arc(cx, headY, 9.8, 0, 7); ctx.fill();
+  ctx.fillStyle = COL.hair; ctx.beginPath(); ctx.arc(cx, headY, 10.4, Math.PI * 1.05, Math.PI * 1.95); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx, headY - 12, 4.5, 0, 7); ctx.fill();
+  // arms
+  for (const sd of [-1, 1]) {
+    const s0 = [cx + sd * 15, shY + 3];
+    let e, w;
+    if (pec != null) { e = [s0[0] + sd * 27 * pec, s0[1] + 2]; w = [e[0], e[1] - 25]; }
+    else { const d = [sd * Math.sin(rad(arms)), Math.cos(rad(arms))]; e = [s0[0] + d[0] * 27, s0[1] + d[1] * 27]; w = [e[0] + d[0] * 25, e[1] + d[1] * 25]; }
+    seg(ctx, s0, e, 8, COL.skin, COL.skinEdge);
+    seg(ctx, e, w, 6.5, COL.skin, COL.skinEdge);
+    if (ex.pads === 'pec') { ctx.fillStyle = COL.pad; roundRect(ctx, e[0] + sd * 3 - 4, w[1] - 2, 8, 30, 3); ctx.fill(); }
+    if (A.db) { ctx.fillStyle = COL.plate; const u = unit(e, w); dumbbell(ctx, w, u); }
+    if (!seated && pec == null) { /* hands */ ctx.fillStyle = COL.skin; ctx.beginPath(); ctx.arc(w[0], w[1], 3.8, 0, 7); ctx.fill(); }
+    if (opts.highlight !== false && m.has('shoulders')) { ctx.save(); ctx.shadowColor = 'rgba(255,31,86,.75)'; ctx.shadowBlur = 7; ctx.fillStyle = COL.red; ctx.globalAlpha = .92; ctx.beginPath(); ctx.arc(s0[0] + sd * 1, s0[1], 5.8, 0, 7); ctx.fill(); ctx.restore(); }
+  }
+  if (opts.highlight !== false) {
+    ctx.shadowColor = 'rgba(255,31,86,.75)'; ctx.shadowBlur = 7; ctx.fillStyle = COL.red; ctx.strokeStyle = COL.red; ctx.globalAlpha = .92;
+    if (m.has('gmed')) for (const sd of [-1, 1]) { ctx.beginPath(); ctx.arc(cx + sd * 17, hipY + 2, 5, 0, 7); ctx.fill(); }
+    if (m.has('chest')) for (const sd of [-1, 1]) { ctx.beginPath(); ctx.ellipse(cx + sd * 7, shY + 12, 6, 4.5, 0, 0, 7); ctx.fill(); }
+    if (m.has('adductors')) for (const p of legPts) { ctx.lineWidth = 5; ctx.lineCap = 'round'; const a = lerpP(p.h, p.kn, 0.25), b = lerpP(p.h, p.kn, 0.85); ctx.beginPath(); ctx.moveTo(a[0] - p.sd * 4, a[1] + 3); ctx.lineTo(b[0] - p.sd * 4, b[1] + 3); ctx.stroke(); }
+  }
+  ctx.restore();
+}
+
+
+const ALT = { chestpress: 'pecdeck', pecdeck: 'chestpress', goblet: 'smithsquat', smithsquat: 'goblet', legcurl: 'seatedcurl', seatedcurl: 'legcurl', abduction: 'sidelift', legraise: 'crunch', cablecrunch: 'crunch', bulgarian: 'lunge', kickback: 'donkey', hipthrust: 'bridge' };
+const PROGRAM = new Set(DAYS.flatMap(d => d.list));
+
+// ---------- helpers ----------
+const $ = (id) => document.getElementById(id);
+const ar = (n) => String(n).replace(/\./g, '٫').replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+const iso = (d) => { const z = new Date(d.getTime() - d.getTimezoneOffset() * 60000); return z.toISOString().slice(0, 10); };
+const today = () => iso(new Date());
+const daysBetween = (a, b) => Math.round((new Date(b) - new Date(a)) / 86400000);
+function weekStart(dstr) { const d = new Date(dstr + 'T12:00:00'); d.setDate(d.getDate() - d.getDay()); return iso(d); }
+
+// ---------- state (saved per person) ----------
+let S = { start: null, log: {}, done: {} };
+let store = null, ref = null, saving = Promise.resolve();
+const LS = 'gym-state-v1';
+try { const v = JSON.parse(localStorage.getItem(LS) || 'null'); if (v) S = Object.assign(S, v); } catch (e) {}
+function save() {
+  try { localStorage.setItem(LS, JSON.stringify(S)); } catch (e) {}
+  if (!ref) return;
+  const body = JSON.parse(JSON.stringify(S));
+  saving = saving.then(() => ref.set(body)).catch(() => {});
+}
+(async () => {
+  try {
+    if (!window.claude?.use) return;
+    const [db, user] = await Promise.all([claude.use('db'), claude.use('user')]);
+    if (!db || !user) return;
+    const uid = await user.id();
+    if (!uid) return;
+    ref = db.doc('data/users/' + uid + '/main');
+    ref.onSnapshot(snap => {
+      if (snap.exists) { const d = snap.data(); S = { start: d.start || null, log: d.log || {}, done: d.done || {} }; try { localStorage.setItem(LS, JSON.stringify(S)); } catch (e) {} render(); refreshModal(); }
+      else if (S.start || Object.keys(S.log).length) save();
+    }, () => { ref = null; });
+  } catch (e) {}
+})();
+
+function ensureStart() { if (!S.start) S.start = today(); }
+function weekNo() { if (!S.start) return 1; return Math.max(1, Math.floor(daysBetween(S.start, today()) / 7) + 1); }
+function stage() { const w = weekNo(); return w <= 2 ? 0 : w <= 4 ? 1 : 2; }
+function isDone(id) { const ws = weekStart(today()); return Object.entries(S.done).some(([d, ids]) => d >= ws && ids.includes(id)); }
+function toggleDone(id) {
+  ensureStart();
+  const t = today(), ws = weekStart(t);
+  if (isDone(id)) { for (const d of Object.keys(S.done)) if (d >= ws) S.done[d] = S.done[d].filter(x => x !== id); }
+  else (S.done[t] = S.done[t] || []).push(id);
+  for (const d of Object.keys(S.done)) if (!S.done[d].length || daysBetween(d, t) > 60) delete S.done[d];
+  save(); render(); refreshModal();
+}
+function dayDone(i) { return DAYS[i].list.every(isDone); }
+
+// ---------- what to lift ----------
+function sets(id) { const e = EX[id]; if (e.cardio || e.q) return ''; return `${ar(stage() ? 3 : 2)} × ${(e.r || ['١٠', '١٢', '١٢'])[stage()]}`; }
+function lift(id, st = stage()) {
+  const e = EX[id];
+  if (e.q) return e.q;
+  if (e.cardio) return `${e.r[st]}`;
+  const v = e.w[st];
+  if (id === 'hipthrust' && st === 0) return `ارفعي ${ar(v)} كجم (البار فاضي)`;
+  if (e.w2 === 'صحن' && v) return `احضني صحن ${ar(v)} كجم`;
+  if (e.w2 === 'فوق البار') return v ? `ارفعي البار + ${ar(v)} كجم` : 'البار فاضي';
+  if (!v) return 'بدون وزن';
+  if (id === 'donkey' || id === 'sidelift') return `أثقال كاحل ${ar(v)} كجم`;
+  if (id === 'bridge') return `دمبل ${ar(v)} كجم على الحوض`;
+  const per = e.per === 'يد' ? ' بكل يد' : e.per === 'رجل' && id === 'kickback' ? '' : '';
+  return `ارفعي ${ar(v)} ${e.unit || 'كجم'}${per}`;
+}
+function nextLift(id) { const st = stage(); return st < 2 && EX[id].w && EX[id].w[st + 1] !== EX[id].w[st] ? lift(id, st + 1) : ''; }
+
+// ---------- body maps ----------
+const BACKSET = new Set(['gmax', 'gmed', 'hams', 'calves', 'lowback', 'back', 'triceps']);
+function bodyMap(muscles, view) {
+  const m = new Set(muscles);
+  const on = (k) => m.has(k) ? 'var(--muscle)' : '#f6e3eb';
+  const base = '#e2b6c8', hair = '#7a4a63';
+  let s = `<svg viewBox="0 0 80 164" aria-hidden="true">`;
+  if (view === 'back') s += `<path d="M34 16 Q33 30 36 40 L44 40 Q47 30 46 16 Z" fill="${hair}"/>`;
+  s += `<g fill="${base}"><circle cx="40" cy="13" r="8.5"/><rect x="36.5" y="20" width="7" height="8" rx="3"/>`;
+  s += `<path d="M25 30 Q40 26 55 30 L54 46 Q51 58 52 66 Q57 76 58 88 L22 88 Q23 76 28 66 Q29 58 26 46 Z"/></g>`;
+  s += view === 'back' ? `<path d="M31.5 13 Q32 4 40 4 Q48 4 48.5 13 Q48 20 40 21 Q32 20 31.5 13Z" fill="${hair}"/>` : `<path d="M31.5 12 Q33 4 40 4 Q47 4 48.5 12 Q44 8 40 8 Q36 8 31.5 12Z" fill="${hair}"/>`;
+  s += `<g stroke="${base}" stroke-linecap="round" fill="none"><path d="M25.5 32 L19 60 L17 84" stroke-width="7"/><path d="M54.5 32 L61 60 L63 84" stroke-width="7"/>`;
+  s += `<path d="M32 86 L33 122 L34 154" stroke-width="12.5"/><path d="M48 86 L47 122 L46 154" stroke-width="12.5"/></g>`;
+  s += `<ellipse cx="25" cy="34" rx="4.5" ry="4.5" fill="${on('shoulders')}"/><ellipse cx="55" cy="34" rx="4.5" ry="4.5" fill="${on('shoulders')}"/>`;
+  if (view === 'front') {
+    s += `<ellipse cx="34" cy="40" rx="6" ry="4.5" fill="${on('chest')}"/><ellipse cx="46" cy="40" rx="6" ry="4.5" fill="${on('chest')}"/>`;
+    s += `<ellipse cx="21.5" cy="48" rx="2.8" ry="6.5" fill="${on('biceps')}"/><ellipse cx="58.5" cy="48" rx="2.8" ry="6.5" fill="${on('biceps')}"/>`;
+    s += `<rect x="35.5" y="50" width="9" height="26" rx="4" fill="${on('abs')}"/>`;
+    s += `<ellipse cx="30" cy="64" rx="3" ry="8" fill="${on('obliques')}"/><ellipse cx="50" cy="64" rx="3" ry="8" fill="${on('obliques')}"/>`;
+    s += `<ellipse cx="31.5" cy="106" rx="5" ry="14" fill="${on('quads')}"/><ellipse cx="48.5" cy="106" rx="5" ry="14" fill="${on('quads')}"/>`;
+    s += `<ellipse cx="36.5" cy="102" rx="2.2" ry="10" fill="${on('adductors')}"/><ellipse cx="43.5" cy="102" rx="2.2" ry="10" fill="${on('adductors')}"/>`;
+  } else {
+    s += `<path d="M29 40 L38.5 42 L38.5 62 L31 56 Z" fill="${on('back')}"/><path d="M51 40 L41.5 42 L41.5 62 L49 56 Z" fill="${on('back')}"/>`;
+    s += `<ellipse cx="21.5" cy="48" rx="2.8" ry="6.5" fill="${on('triceps')}"/><ellipse cx="58.5" cy="48" rx="2.8" ry="6.5" fill="${on('triceps')}"/>`;
+    s += `<rect x="35.5" y="64" width="9" height="12" rx="4" fill="${on('lowback')}"/>`;
+    s += `<ellipse cx="26.5" cy="80" rx="4" ry="5" fill="${on('gmed')}"/><ellipse cx="53.5" cy="80" rx="4" ry="5" fill="${on('gmed')}"/>`;
+    s += `<ellipse cx="33" cy="90" rx="8.5" ry="9" fill="${on('gmax')}"/><ellipse cx="47" cy="90" rx="8.5" ry="9" fill="${on('gmax')}"/>`;
+    s += `<ellipse cx="33" cy="114" rx="5" ry="11" fill="${on('hams')}"/><ellipse cx="47" cy="114" rx="5" ry="11" fill="${on('hams')}"/>`;
+    s += `<ellipse cx="33.5" cy="138" rx="4.5" ry="8" fill="${on('calves')}"/><ellipse cx="46.5" cy="138" rx="4.5" ry="8" fill="${on('calves')}"/>`;
+  }
+  return s + `</svg>`;
+}
+
+// ---------- views ----------
+let page = 'plan', day = 0;
+try { const p = localStorage.getItem('gym-page'); if (p) page = p; const d = +localStorage.getItem('gym-day2'); if (d >= 0 && d < 4) day = d; } catch (e) {}
+if (!['plan', 'cardio', 'pilates', 'warm', 'stretch', 'log'].includes(page)) page = 'plan';
+
+function card(id, i, checkable) {
+  const e = EX[id];
+  const top = e.q ? e.q : lift(id);
+  const sub = e.q ? '' : e.cardio ? e.mach : `${sets(id)} · <bdi>${e.mach}</bdi>`;
+  return `<article class="card${checkable && isDone(id) ? ' is-done' : ''}" data-open="${id}" tabindex="0">
+    <div class="thumb"><canvas data-id="${id}"></canvas>${i != null ? `<span class="num">${ar(i + 1)}</span>` : ''}
+      ${checkable ? `<button class="check" data-check="${id}" aria-pressed="${isDone(id)}" aria-label="خلّصته">✓</button>` : ''}</div>
+    <div class="cbody"><h4>${e.ar}</h4><span class="lift">${top}</span>${sub ? `<span class="sub">${sub}</span>` : ''}</div></article>`;
+}
+
+function render() {
+  $('wkLabel').textContent = `الأسبوع ${ar(weekNo())}`;
+  document.querySelectorAll('.pg').forEach(b => b.setAttribute('aria-pressed', b.dataset.p === page));
+  let h = '';
+  if (page === 'plan') {
+    const D = DAYS[day];
+    h += `<div class="days">${DAYS.map((d, i) => `<button class="day" data-day="${i}" aria-pressed="${i === day}"><span class="n">اليوم ${ar(i + 1)}</span><span class="t">${d.title}</span>${dayDone(i) ? '<span class="done">✓</span>' : ''}</button>`).join('')}</div>`;
+    h += `<div class="chips">${D.eat ? '<span class="chip eat">يوم أكل زين: كارب قبل التمرين وبروتين بعده</span>' : ''}
+      <button class="chip" data-p="warm">قبله: إحماء ${ar(D.warm)} د</button>
+      <span class="chip">بعده: ${D.cardio}</span>
+      <button class="chip" data-p="stretch">آخر شي: إطالة</button></div>`;
+    h += `<div class="grid">${D.list.map((id, i) => card(id, i, true)).join('')}</div>`;
+  } else if (page === 'cardio') {
+    h += `<p class="lead">بعد الأوزان. يوم ٢ و٤: ٢٠ دقيقة. يوم ١: ١٠ دقايق اختياري. يوم ٣: بدون.</p>`;
+    h += `<div class="grid">${['treadmill', 'stair', 'bike'].map(id => card(id)).join('')}</div>`;
+  } else if (page === 'pilates') {
+    h += `<p class="lead">بالبيت أو على المات. مرتين بالأسبوع بأيام الراحة.</p>`;
+    h += `<div class="grid">${Object.keys(PILATES).map((id, i) => card(id, i)).join('')}</div>`;
+  } else if (page === 'warm') {
+    h += `<p class="lead">قبل التمرين. يوم ١ و٣: ١٠ دقايق (الأهم). يوم ٢ و٤: ٥–٨ دقايق.</p>`;
+    h += `<div class="grid">${Object.keys(WARM).map((id, i) => card(id, i)).join('')}</div>`;
+  } else if (page === 'stretch') {
+    h += `<p class="lead">بعد التمرين. اثبتي بهدوء، بدون ألم.</p>`;
+    h += `<div class="grid">${Object.keys(STRETCH).map((id, i) => card(id, i)).join('')}</div>`;
+  } else {
+    h += `<div class="chips" style="align-items:center"><span class="stepper"><button id="wMinus" aria-label="أسبوع أقل">−</button><b>الأسبوع ${ar(weekNo())}</b><button id="wPlus" aria-label="أسبوع أكثر">+</button></span><span class="note">الأوزان المطلوبة تتغير تلقائياً كل أسبوعين.</span></div>`;
+    h += `<div class="week">${DAYS.map((d, i) => { const n = d.list.filter(isDone).length; return `<div class="wd${dayDone(i) ? ' ok' : ''}"><b>${dayDone(i) ? '✓' : `${ar(n)}/${ar(d.list.length)}`}</b>اليوم ${ar(i + 1)}</div>`; }).join('')}</div>`;
+    const rows = [...PROGRAM].map(id => { const L = S.log[id] || []; const last = L[L.length - 1]; const best = L.length ? Math.max(...L.map(x => x[1])) : null; return { id, last, best, n: L.length }; });
+    h += `<div class="tbl"><table><thead><tr><th>التمرين</th><th>آخر وزن</th><th>أعلى وزن</th><th>المرة الجاية</th></tr></thead><tbody>${rows.map(r => `<tr data-open="${r.id}"><td>${EX[r.id].ar}</td><td>${r.last ? ar(r.last[1]) + ' كجم' : '—'}</td><td>${r.best != null ? ar(r.best) + ' كجم' : '—'}</td><td class="go">${lift(r.id)}</td></tr>`).join('')}</tbody></table></div>`;
+    h += `<p class="note">اضغطي على أي تمرين عشان تسجلين الوزن.</p>`;
+  }
+  $('view').innerHTML = h;
+  $('view').querySelectorAll('[data-day]').forEach(b => b.onclick = () => { day = +b.dataset.day; try { localStorage.setItem('gym-day2', day); } catch (e) {} render(); });
+  $('view').querySelectorAll('[data-p]').forEach(b => b.onclick = () => go(b.dataset.p));
+  $('view').querySelectorAll('[data-check]').forEach(b => b.onclick = (ev) => { ev.stopPropagation(); toggleDone(b.dataset.check); });
+  $('view').querySelectorAll('[data-open]').forEach(c => { c.onclick = () => openModal(c.dataset.open); c.onkeydown = (ev) => { if (ev.key === 'Enter') openModal(c.dataset.open); }; });
+  const wm = $('wMinus'), wp = $('wPlus');
+  if (wm) { wm.onclick = () => setWeek(weekNo() - 1); wp.onclick = () => setWeek(weekNo() + 1); }
+  collect();
+}
+function setWeek(n) { n = Math.max(1, Math.min(52, n)); const d = new Date(today() + 'T12:00:00'); d.setDate(d.getDate() - (n - 1) * 7); S.start = iso(d); save(); render(); }
+function go(p) { page = p; try { localStorage.setItem('gym-page', p); } catch (e) {} render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+document.querySelectorAll('.pg').forEach(b => b.onclick = () => go(b.dataset.p));
+
+// ---------- modal ----------
+let mId = null, slow = false, lastFocus = null, savedMsg = '';
+function openModal(id) { mId = id; savedMsg = ''; lastFocus = document.activeElement; $('modal').hidden = false; refreshModal(); sizeAll(); $('mClose').focus(); }
+function closeModal() { $('modal').hidden = true; mId = null; if (lastFocus) lastFocus.focus(); }
+$('mClose').onclick = closeModal;
+$('modal').onclick = (ev) => { if (ev.target === $('modal')) closeModal(); };
+document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && mId) closeModal(); });
+$('mSlow').onclick = () => { slow = !slow; $('mSlow').setAttribute('aria-pressed', slow); };
+function refreshModal() {
+  if (!mId) return;
+  const id = mId, e = EX[id], inProg = PROGRAM.has(id);
+  const L = (S.log[id] || []).slice(-6).reverse();
+  const loggable = !e.q && !e.cardio && e.w && e.w.some(v => v > 0);
+  let h = `<div class="mtop"><div style="display:grid;gap:4px;min-width:0"><h2 id="mName">${e.ar}</h2>${e.en ? `<span class="en">${e.en}</span>` : ''}
+      <span class="big">${e.q ? e.q : lift(id)}</span>${e.q ? '' : `<span class="sub">${e.cardio ? e.mach : sets(id) + ' · <bdi>' + e.mach + '</bdi>'}</span>`}
+      ${nextLift(id) ? `<span class="sub">بعد أسبوعين: ${nextLift(id)}</span>` : ''}</div>
+    <div class="maps"><figure>${bodyMap(e.m, 'front')}<figcaption>قدام</figcaption></figure><figure>${bodyMap(e.m, 'back')}<figcaption>خلف</figcaption></figure></div></div>
+    <div class="chips">${e.m.map(k => `<span class="mchip">${MUSCLES[k]}</span>`).join('')}</div>
+    ${e.tip ? `<p class="tip">${e.tip}</p>` : ''}`;
+  if (loggable) h += `<div class="logrow"><label for="mKg">رفعت اليوم</label><input id="mKg" type="number" inputmode="decimal" min="0" step="0.5" placeholder="كجم"><button class="btn" id="mSave">سجّلي</button><span class="saved" id="mSaved">${savedMsg}</span>
+      ${L.length ? `<div class="hist" style="flex-basis:100%">${L.map(([d, kg]) => `<span>${ar(d.slice(5).replace('-', '/'))} · ${ar(kg)} كجم</span>`).join('')}</div>` : ''}</div>`;
+  if (inProg) h += `<div class="chips"><button class="btn${isDone(id) ? ' okd' : ''}" id="mDone">${isDone(id) ? '✓ خلّصته هالأسبوع' : 'خلّصته'}</button>${ALT[id] ? `<button class="btn ghost" id="mAlt">الجهاز مشغول؟ ${EX[ALT[id]].ar}</button>` : ''}</div>`;
+  else if (ALT[id]) h += `<div class="chips"><button class="btn ghost" id="mAlt">بديله: ${EX[ALT[id]].ar}</button></div>`;
+  $('mBody').innerHTML = h;
+  const sv = $('mSave');
+  if (sv) sv.onclick = () => {
+    const v = parseFloat(String($('mKg').value).replace('٫', '.').replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)));
+    if (!(v > 0)) { $('mSaved').textContent = 'اكتبي الوزن بالأرقام'; return; }
+    ensureStart();
+    const arr = S.log[id] = S.log[id] || [];
+    const t = today(); const ex = arr.findIndex(x => x[0] === t); if (ex >= 0) arr.splice(ex, 1);
+    arr.push([t, v]); if (arr.length > 40) arr.splice(0, arr.length - 40);
+    savedMsg = 'انحفظ ✓'; save(); refreshModal(); render();
+  };
+  const dn = $('mDone'); if (dn) dn.onclick = () => toggleDone(id);
+  const al = $('mAlt'); if (al) al.onclick = () => openModal(ALT[id]);
+}
+
+// ---------- animation ----------
+let cvs = [];
+const io = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(en => { const c = cvs.find(x => x.el === en.target); if (c) c.vis = en.isIntersecting; }), { rootMargin: '200px' }) : null;
+function collect() {
+  if (io) io.disconnect();
+  cvs = [...document.querySelectorAll('#view canvas[data-id]')].map(el => ({ el, id: el.dataset.id, vis: true }));
+  sizeAll();
+  if (io) cvs.forEach(c => io.observe(c.el));
+}
+function fit(el) { const dpr = Math.min(window.devicePixelRatio || 1, 2); const r = el.getBoundingClientRect(); el.width = Math.max(1, Math.round(r.width * dpr)); el.height = Math.max(1, Math.round(r.height * dpr)); }
+function sizeAll() { cvs.forEach(c => fit(c.el)); if (mId) fit($('mCv')); }
+window.addEventListener('resize', sizeAll);
+const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+let mt = 0, lastNow = 0;
+function frame(now) {
+  const dt = now - lastNow; lastNow = now;
+  const t = reduce ? 700 : now;
+  if (mId) { mt += reduce ? 0 : dt * (slow ? 0.4 : 1); const c = $('mCv'); drawScene(c.getContext('2d'), c.width, c.height, mId, reduce ? 700 : mt); }
+  else for (const c of cvs) if (c.vis) drawScene(c.el.getContext('2d'), c.el.width, c.el.height, c.id, t);
+  requestAnimationFrame(frame);
+}
+render();
+requestAnimationFrame(frame);
+</script>
+</body></html>
