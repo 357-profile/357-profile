@@ -8,9 +8,9 @@
   "fill1": 60,
   "fill_stagger": 8,
   "boom": 63,
-  "zoom": 0.035,
-  "punch": 0.06,
-  "flash": 0.6
+  "zoom": 0.0,
+  "punch": 0.0,
+  "flash": 0.0
  },
  "scenes": [
   {
