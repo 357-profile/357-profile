@@ -1,9 +1,10 @@
 {
  "video_id": "pavilion-sketch-reveal",
- "stage": "delivered_reels_awaiting_approval",
+ "stage": "approved_final",
  "credits_used": 0,
  "approvals": {
-  "idea": "user-directed (scenes + order given directly, no credits)"
+  "idea": "user-directed (scenes + order given directly, no credits)",
+  "final": "Haneen: vertical crop is fine (reels version)"
  },
  "outputs": {
   "reels_9x16": "final/pavilion_reels_9x16.mp4",
