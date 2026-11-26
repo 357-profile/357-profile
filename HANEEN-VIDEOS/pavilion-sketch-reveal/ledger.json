@@ -1,4 +1,27 @@
-{"video_id":"pavilion-sketch-reveal","stage":"delivered_v1_awaiting_approval","credits_used":0,
- "approvals":{"idea":"user-directed (scenes + order given directly, no credits)"},
- "outputs":{"v1":"final/pavilion_16x9.mp4"},
- "scene_order":["s1_lounge","s2_meeting","s3_painting","s4_reception","s5_stairs","s6_elevators"]}
+{
+ "video_id": "pavilion-sketch-reveal",
+ "stage": "delivered_v2_awaiting_approval",
+ "credits_used": 0,
+ "approvals": {
+  "idea": "user-directed (scenes + order given directly, no credits)"
+ },
+ "outputs": {
+  "v2": "final/pavilion_v2_16x9.mp4"
+ },
+ "scene_order": [
+  "s1_lounge",
+  "s2_meeting",
+  "s3_painting",
+  "s4_reception_front",
+  "s5_stairs",
+  "s6_elevators"
+ ],
+ "before_sources": {
+  "s1": "haneen",
+  "s2": "haneen",
+  "s3": "lama (missing from haneen)",
+  "s4_front": "haneen",
+  "s5": "haneen",
+  "s6": "haneen"
+ }
+}
