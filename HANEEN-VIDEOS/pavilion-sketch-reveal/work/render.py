@@ -42,7 +42,7 @@ def build_scene(sc):
     m=fit(np.array(Image.open(sc['mask']).convert('L')),sc.get('crop'),cv2.INTER_LINEAR)
     m=(m>127).astype(np.uint8)*255
     m=cv2.morphologyEx(m,cv2.MORPH_OPEN,np.ones((5,5),np.uint8)); m=cv2.morphologyEx(m,cv2.MORPH_CLOSE,np.ones((9,9),np.uint8))
-    T=sc['timing']; W=sc.get('width',15)
+    T=sc['timing']; k_=sc.get('k',1.0); W=sc.get('width',15)*k_
     pal=colorize(after, sc.get('sat',1.18), sc.get('val',1.0), blur=sc.get('pal_blur',11))
     # dominant colour -> outline colour
     px=after[m>0].reshape(-1,3).astype(np.float32); med=np.median(px,0)
@@ -52,12 +52,12 @@ def build_scene(sc):
     if sc.get('outline_rgb'): oc=tuple(sc['outline_rgb'])
     strokes_fill=[]; strokes_line=[]
     n,lab,st,cen=cv2.connectedComponentsWithStats(m)
-    comps=[i for i in range(1,n) if st[i,4]>sc.get('min_area',1500)]
+    comps=[i for i in range(1,n) if st[i,4]>sc.get('min_area',1500)*k_*k_]
     comps.sort(key=lambda i: st[i,0])
     nC=len(comps)
     # ---- outlines
     cnts,_=cv2.findContours(m,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
-    cnts=[c for c in cnts if cv2.contourArea(c)>sc.get('min_area',1500)]
+    cnts=[c for c in cnts if cv2.contourArea(c)>sc.get('min_area',1500)*k_*k_]
     cnts.sort(key=lambda c: c[:,0,0].min())
     for j,c in enumerate(cnts):
         p=resample(np.r_[c[:,0,:],c[:1,0,:]],3); p=smooth_closed(p,8)
@@ -66,21 +66,21 @@ def build_scene(sc):
         # start at top-left-ish point, overshoot 4%
         k=int(np.argmin(p[:,0]+p[:,1])); p=np.r_[p[k:],p[:k]]; p=np.r_[p,p[:max(3,len(p)//25)]]
         stg=j/max(1,len(cnts))*T['line_stagger']
-        strokes_line.append(Stroke(p,sc.get('outline_w',5),None,T['line0']+stg,T['line1']+stg*0.3,0.97))
+        strokes_line.append(Stroke(p,sc.get('outline_w',5)*k_,None,T['line0']+stg,T['line1']+stg*0.3,0.97))
         n_=len(p); a_=int(rng.uniform(0,0.5)*n_); b_=min(n_,a_+int(rng.uniform(0.35,0.6)*n_))
         p2=None
         if b_-a_>10:
             seg=p[a_:b_]; nr=np.gradient(seg,axis=0); nr=np.c_[-nr[:,1],nr[:,0]]; nr/=np.linalg.norm(nr,axis=1,keepdims=True)+1e-6
             p2=seg+nr*(rng.uniform(2.5,4.5)+wobble(len(seg),2.0,0.03))[:,None]
         if p2 is not None and len(p2)>10:
-            strokes_line.append(Stroke(p2,max(2,sc.get('outline_w',5)-1.5),None,T['line0']+stg+6,T['line1']+stg*0.3+6,0.8))
+            strokes_line.append(Stroke(p2,max(2,(sc.get('outline_w',5)-1.5)*k_),None,T['line0']+stg+6,T['line1']+stg*0.3+6,0.8))
     # ---- inner detail lines (from real edges of the element)
     if sc.get('details',True):
-        g=cv2.GaussianBlur(cv2.cvtColor(after,cv2.COLOR_RGB2GRAY),(0,0),sc.get('det_blur',2.2))
+        g=cv2.GaussianBlur(cv2.cvtColor(after,cv2.COLOR_RGB2GRAY),(0,0),sc.get('det_blur',2.2)*k_)
         e=cv2.Canny(g,sc.get('canny',[35,90])[0],sc.get('canny',[35,90])[1])
         er=cv2.erode(m,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(15,15))); e[er==0]=0
         dc,_=cv2.findContours(e,cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
-        dc=[d for d in dc if cv2.arcLength(d,False)>sc.get('det_min',90)]
+        dc=[d for d in dc if cv2.arcLength(d,False)>sc.get('det_min',90)*k_]
         dc.sort(key=lambda d:-cv2.arcLength(d,False)); dc=dc[:min(sc.get('det_max',40),14)]
         dc.sort(key=lambda d: d[:,0,0].min())
         for j,d in enumerate(dc):
@@ -90,7 +90,7 @@ def build_scene(sc):
             p=resample(p,3)
             if len(p)>21: p=cv2.GaussianBlur(p.reshape(-1,1,2),(1,21),5).reshape(-1,2)
             stg=j/max(1,len(dc))*T['line_stagger']
-            strokes_line.append(Stroke(p,sc.get('det_w',2.8),None,T['line0']+0.15+stg,T['line1']+stg*0.4,0.85))
+            strokes_line.append(Stroke(p,sc.get('det_w',2.8)*k_,None,T['line0']+0.15+stg,T['line1']+stg*0.4,0.85))
     # ---- random, casual scribble per component
     Wf=W*0.78; sp=Wf*sc.get('density',1.0)
     def soften(pts):
@@ -135,7 +135,7 @@ def build_scene(sc):
             cols_=pal[np.clip(p[:,1].astype(int),0,OH-1),np.clip(p[:,0].astype(int),0,OW-1)]
             wv=Wf*wm*(0.72+0.5*(0.5+0.5*np.sin(np.cumsum(rng.normal(0,0.18,len(p))))))  # pressure variation
             st_=Stroke(p,Wf*wm,cols_,a0,a1,0.95); st_.wv=wv; strokes_fill.append(st_)
-    clip=cv2.dilate(m,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(sc.get('overshoot',19),)*2)).astype(np.float32)/255.
+    clip=cv2.dilate(m,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(int(sc.get('overshoot',19)*k_)|1,)*2)).astype(np.float32)/255.
     clip=cv2.GaussianBlur(clip,(0,0),1.5)
     cx,cy=sc.get('zoom_center',[OW/2,OH/2])
     return dict(after=after,before=before,mask=m,clip=clip,fill=strokes_fill,line=strokes_line,oc=oc,T=T,center=(cx,cy),sc=sc)
@@ -183,6 +183,7 @@ def render_scene(S, emit):
 if __name__=='__main__':
     cfg=json.load(open(sys.argv[1])); out=sys.argv[2]
     if 'size' in cfg: OW,OH=cfg['size']
+
     CW,CH=cfg.get('canvas',[OW,OH])
     def compose(fr):
         if (CW,CH)==(OW,OH): return fr
