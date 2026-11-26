@@ -1,12 +1,13 @@
 {
  "video_id": "pavilion-sketch-reveal",
- "stage": "delivered_v5_awaiting_approval",
+ "stage": "delivered_v5_vertical_awaiting_approval",
  "credits_used": 0,
  "approvals": {
   "idea": "user-directed (scenes + order given directly, no credits)"
  },
  "outputs": {
-  "v5": "final/pavilion_v5_16x9.mp4"
+  "v5_16x9": "final/pavilion_v5_16x9.mp4",
+  "v5_9x16": "final/pavilion_v5_9x16.mp4"
  },
  "scene_order": [
   "s1_lounge",
@@ -25,5 +26,6 @@
   "s6": "haneen"
  },
  "reveal": "hard cut, no flash/zoom (Haneen request)",
- "scribble": "soft + random: irregular spacing, short strokes, curls, crossings, pressure variation, sketchy double outline (Haneen request)"
+ "scribble": "soft + random: irregular spacing, short strokes, curls, crossings, pressure variation, sketchy double outline (Haneen request)",
+ "vertical": "1080x1920: image band 1080x781 (crop ~78% width centred on element) + blurred dimmed background"
 }

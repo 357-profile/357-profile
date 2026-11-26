@@ -182,6 +182,16 @@ def render_scene(S, emit):
 
 if __name__=='__main__':
     cfg=json.load(open(sys.argv[1])); out=sys.argv[2]
+    if 'size' in cfg: OW,OH=cfg['size']
+    CW,CH=cfg.get('canvas',[OW,OH])
+    def compose(fr):
+        if (CW,CH)==(OW,OH): return fr
+        bh=round(CW*OH/OW); band=cv2.resize(fr,(CW,bh),interpolation=cv2.INTER_AREA)
+        sw=96; small=cv2.resize(fr,(sw,round(sw*OH/OW)),interpolation=cv2.INTER_AREA)
+        s_=max(CW/small.shape[1],CH/small.shape[0]); bg=cv2.resize(small,(round(small.shape[1]*s_)+2,round(small.shape[0]*s_)+2),interpolation=cv2.INTER_LINEAR)
+        ox,oy=(bg.shape[1]-CW)//2,(bg.shape[0]-CH)//2; bg=bg[oy:oy+CH,ox:ox+CW]
+        bg=cv2.GaussianBlur(bg,(0,0),28).astype(np.float32)*cfg.get('bg_dim',0.42)
+        cvs=bg.astype(np.uint8); y0=(CH-bh)//2; cvs[y0:y0+bh]=band; return cvs
     prev=sys.argv[sys.argv.index('--preview')+1] if '--preview' in sys.argv else None
     if prev:
         import os; os.makedirs('work/preview',exist_ok=True)
@@ -195,10 +205,10 @@ if __name__=='__main__':
         Image.fromarray(sheet).save(f'work/preview/{prev}.jpg',quality=88)
         Image.fromarray(frames[T['boom']-1]).save(f'work/preview/{prev}_scribble.jpg',quality=90)
         print('preview ok',len(S['fill']),'fill strokes',len(S['line']),'lines'); sys.exit()
-    ff=subprocess.Popen(['ffmpeg','-v','error','-y','-f','rawvideo','-pix_fmt','rgb24','-s',f'{OW}x{OH}','-r',str(FPS),'-i','-',
+    ff=subprocess.Popen(['ffmpeg','-v','error','-y','-f','rawvideo','-pix_fmt','rgb24','-s',f'{CW}x{CH}','-r',str(FPS),'-i','-',
         '-f','lavfi','-i','anullsrc=r=48000:cl=stereo','-shortest','-c:v','libx264','-preset','slow','-crf','16','-pix_fmt','yuv420p',
         '-c:a','aac','-b:a','128k','-movflags','+faststart',out],stdin=subprocess.PIPE)
     for sc in cfg['scenes']:
         sc['timing']={**cfg['timing'],**sc.get('timing',{})}
-        S=build_scene(sc); render_scene(S, lambda fr: ff.stdin.write(fr.tobytes())); print('scene',sc['name'],flush=True)
+        S=build_scene(sc); render_scene(S, lambda fr: ff.stdin.write(np.ascontiguousarray(compose(fr)).tobytes())); print('scene',sc['name'],flush=True)
     ff.stdin.close(); ff.wait(); print('wrote',out)
