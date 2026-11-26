@@ -1,13 +1,13 @@
 {
  "video_id": "pavilion-sketch-reveal",
- "stage": "approved_final",
+ "stage": "delivered_reels_wide_awaiting_approval",
  "credits_used": 0,
  "approvals": {
   "idea": "user-directed (scenes + order given directly, no credits)",
   "final": "Haneen: vertical crop is fine (reels version)"
  },
  "outputs": {
-  "reels_9x16": "final/pavilion_reels_9x16.mp4",
+  "reels_wide_9x16": "final/pavilion_reels_wide_9x16.mp4",
   "v5_16x9": "final/pavilion_v5_16x9.mp4"
  },
  "scene_order": [
@@ -28,5 +28,5 @@
  },
  "reveal": "hard cut, no flash/zoom (Haneen request)",
  "scribble": "soft + random: irregular spacing, short strokes, curls, crossings, pressure variation, sketchy double outline (Haneen request)",
- "vertical": "full-bleed 1080x1920: 9:16 crop of each photo centred on its element, Real-ESRGAN x2 upscale (work/make_vertical.py); lounge shows the left seating group, elevators shows the middle lift"
+ "vertical": "full-bleed 1080x1920, wider crop (800px) + LaMa ceiling/floor extension, tone-matched, Real-ESRGAN x2"
 }

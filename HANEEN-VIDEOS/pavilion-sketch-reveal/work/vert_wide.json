@@ -1,0 +1,51 @@
+{
+ "s1_lounge": {
+  "after": "src/s1_lounge.png",
+  "before": "work/s1_lounge_before.png",
+  "mask": "work/masks/s1_lounge_sam.png",
+  "cx": 520,
+  "crop_w": 800,
+  "top_share": 0.72
+ },
+ "s2_meeting": {
+  "after": "work/s2_meeting_after_x4.png",
+  "before": "work/s2_meeting_before_x4.png",
+  "mask": "work/masks/s2_meeting_sam_x4.png",
+  "pre_scale": 0.5,
+  "cx": 734,
+  "crop_w": 920,
+  "top_share": 0.72
+ },
+ "s3_painting": {
+  "after": "src/s3_painting.png",
+  "before": "work/s3_painting_before.png",
+  "mask": "work/masks/s3_painting_sam.png",
+  "cx": 823,
+  "crop_w": 800,
+  "top_share": 0.72
+ },
+ "s4_reception_front": {
+  "after": "src/x_reception_front.png",
+  "before": "work/s4_reception_front_before.png",
+  "mask": "work/masks/s4_reception_front_sam.png",
+  "cx": 836,
+  "crop_w": 800,
+  "top_share": 0.72
+ },
+ "s5_stairs": {
+  "after": "src/s5_stairs.png",
+  "before": "work/s5_stairs_before.png",
+  "mask": "work/masks/s5_stairs_sam.png",
+  "cx": 745,
+  "crop_w": 800,
+  "top_share": 0.72
+ },
+ "s6_elevators": {
+  "after": "src/s6_elevators.png",
+  "before": "work/s6_elevators_before.png",
+  "mask": "work/masks/s6_elevators_sam.png",
+  "cx": 848,
+  "crop_w": 800,
+  "top_share": 0.72
+ }
+}
