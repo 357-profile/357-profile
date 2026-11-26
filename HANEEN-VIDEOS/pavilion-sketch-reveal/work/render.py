@@ -67,6 +67,13 @@ def build_scene(sc):
         k=int(np.argmin(p[:,0]+p[:,1])); p=np.r_[p[k:],p[:k]]; p=np.r_[p,p[:max(3,len(p)//25)]]
         stg=j/max(1,len(cnts))*T['line_stagger']
         strokes_line.append(Stroke(p,sc.get('outline_w',5),None,T['line0']+stg,T['line1']+stg*0.3,0.97))
+        n_=len(p); a_=int(rng.uniform(0,0.5)*n_); b_=min(n_,a_+int(rng.uniform(0.35,0.6)*n_))
+        p2=None
+        if b_-a_>10:
+            seg=p[a_:b_]; nr=np.gradient(seg,axis=0); nr=np.c_[-nr[:,1],nr[:,0]]; nr/=np.linalg.norm(nr,axis=1,keepdims=True)+1e-6
+            p2=seg+nr*(rng.uniform(2.5,4.5)+wobble(len(seg),2.0,0.03))[:,None]
+        if p2 is not None and len(p2)>10:
+            strokes_line.append(Stroke(p2,max(2,sc.get('outline_w',5)-1.5),None,T['line0']+stg+6,T['line1']+stg*0.3+6,0.8))
     # ---- inner detail lines (from real edges of the element)
     if sc.get('details',True):
         g=cv2.GaussianBlur(cv2.cvtColor(after,cv2.COLOR_RGB2GRAY),(0,0),sc.get('det_blur',2.2))
@@ -84,40 +91,51 @@ def build_scene(sc):
             if len(p)>21: p=cv2.GaussianBlur(p.reshape(-1,1,2),(1,21),5).reshape(-1,2)
             stg=j/max(1,len(dc))*T['line_stagger']
             strokes_line.append(Stroke(p,sc.get('det_w',2.8),None,T['line0']+0.15+stg,T['line1']+stg*0.4,0.85))
-    # ---- zigzag scribble per component
+    # ---- random, casual scribble per component
+    Wf=W*0.78; sp=Wf*sc.get('density',1.0)
+    def soften(pts):
+        q0=np.asarray(pts,np.float32); q=[q0[0]]
+        for a_,b_ in zip(q0[:-1],q0[1:]): q+=[a_+0.12*(b_-a_), a_+0.88*(b_-a_), b_]
+        q=np.asarray(q,np.float32)
+        for _ in range(3):
+            a=q[:-1]; b=q[1:]; q=np.vstack([q[:1],np.stack([0.75*a+0.25*b,0.25*a+0.75*b],1).reshape(-1,2),q[-1:]])
+        q=resample(q,4)
+        if len(q)>15: q=cv2.GaussianBlur(q.reshape(-1,1,2),(1,15),3).reshape(-1,2)
+        return q
+    def scribble(cm, horiz, step_lo, step_hi, p_short, p_curl, p_back):
+        g=cm if horiz else cm.T
+        us=np.where(g.any(0))[0]
+        if len(us)<3: return []
+        u=us[0]+rng.uniform(0,sp); side=int(rng.integers(0,2)); pts=[]; guard=0
+        while u<us[-1] and guard<4000:
+            guard+=1; col=np.where(g[:,int(np.clip(u,0,g.shape[1]-1))])[0]
+            if len(col)==0: u+=sp; continue
+            top,bot=col.min(),col.max(); span=max(bot-top,4)
+            if rng.random()<p_short: f=rng.uniform(0.3,0.7)
+            else: f=rng.uniform(-0.10,0.22) if side==0 else rng.uniform(0.78,1.10)
+            v=top+f*span; du=rng.uniform(-0.12,0.5)*span*sc.get('tilt',0.28) if side==0 else rng.normal(0,0.05)*span
+            pts.append((u+du,v))
+            if rng.random()<p_curl:   # little curl at the turn
+                r=sp*rng.uniform(0.6,1.3); a0=rng.uniform(0,6.28); d=1 if rng.random()<.5 else -1
+                for t in np.linspace(0,6.0,7): pts.append((u+du+r*np.cos(a0+d*t)-r*np.cos(a0), v+r*np.sin(a0+d*t)-r*np.sin(a0)))
+            side^=1
+            u+= -sp*rng.uniform(1.0,3.0) if rng.random()<p_back else sp*rng.uniform(step_lo,step_hi)
+        pts=[(a,b) for a,b in pts] if horiz else [(b,a) for a,b in pts]
+        return pts
     for ci,i in enumerate(comps):
         cm=(lab==i).astype(np.uint8); x,y,w,h,a=st[i]
-        vertical_prog = h>sc.get('vert_ratio',1.35)*w
-        W=W*0.78; s=W*sc.get('density',1.05)
-        pts=[]
-        if not vertical_prog:
-            cols=np.arange(x+2,x+w-2,s)
-            for k,xx in enumerate(cols):
-                col=np.where(cm[:,int(xx)])[0]
-                if len(col)==0: continue
-                top,bot=col.min(),col.max(); span=bot-top
-                yy=(top-rng.uniform(-.04,.10)*span) if k%2==0 else (bot+rng.uniform(-.04,.10)*span)
-                pts.append((xx+rng.normal(0,s*0.18)+(sc.get('tilt',0.28)*span if k%2==0 else 0),yy))
-        else:
-            rows=np.arange(y+2,y+h-2,s)
-            for k,yy in enumerate(rows):
-                row=np.where(cm[int(yy),:])[0]
-                if len(row)==0: continue
-                l,r=row.min(),row.max(); span=r-l
-                xx=(l-rng.uniform(-.04,.10)*span) if k%2==0 else (r+rng.uniform(-.04,.10)*span)
-                pts.append((xx,yy+rng.normal(0,s*0.18)+(sc.get('tilt',0.28)*0.5*span if k%2==0 else 0)))
-        if len(pts)<2: continue
-        q0=np.asarray(pts,np.float32); q=[q0[0]]
-        for a_,b_ in zip(q0[:-1],q0[1:]): q+= [a_+0.12*(b_-a_), a_+0.88*(b_-a_), b_]   # keep reach, round only the turns
-        q=np.asarray(q,np.float32)
-        for _ in range(3):   # Chaikin corner cutting -> soft rounded turns like a relaxed hand
-            a=q[:-1]; b=q[1:]; q=np.vstack([q[:1],np.stack([0.75*a+0.25*b,0.25*a+0.75*b],1).reshape(-1,2),q[-1:]])
-        p=resample(q,4)
-        if len(p)>15: p=cv2.GaussianBlur(p.reshape(-1,1,2),(1,15),3).reshape(-1,2)
-        cols_=pal[np.clip(p[:,1].astype(int),0,OH-1),np.clip(p[:,0].astype(int),0,OW-1)]
-        stg=ci/max(1,nC)*T['fill_stagger']
-        strokes_fill.append(Stroke(p,W,cols_,T['fill0']+stg,T['fill1']-(T['fill_stagger']-stg)*0.5,0.95))
-    clip=cv2.dilate(m,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(11,11))).astype(np.float32)/255.
+        horiz = not (h>sc.get('vert_ratio',1.35)*w)
+        stg=ci/max(1,nC)*T['fill_stagger']; t0=T['fill0']+stg; t1=T['fill1']-(T['fill_stagger']-stg)*0.5
+        passes=[(horiz,0.45,1.7,0.16,0.10,0.08,t0,t1,1.0),               # main pass: irregular back-and-forth
+                (not horiz,1.6,3.4,0.25,0.06,0.0,t0+(t1-t0)*0.45,t1,0.8)]  # sparse cross pass -> random crossings
+        for hz,lo,hi,ps,pc,pb,a0,a1,wm in passes:
+            pts=scribble(cm,hz,lo,hi,ps,pc,pb)
+            if len(pts)<2: continue
+            p=soften(pts)
+            cols_=pal[np.clip(p[:,1].astype(int),0,OH-1),np.clip(p[:,0].astype(int),0,OW-1)]
+            wv=Wf*wm*(0.72+0.5*(0.5+0.5*np.sin(np.cumsum(rng.normal(0,0.18,len(p))))))  # pressure variation
+            st_=Stroke(p,Wf*wm,cols_,a0,a1,0.95); st_.wv=wv; strokes_fill.append(st_)
+    clip=cv2.dilate(m,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(sc.get('overshoot',19),)*2)).astype(np.float32)/255.
     clip=cv2.GaussianBlur(clip,(0,0),1.5)
     cx,cy=sc.get('zoom_center',[OW/2,OH/2])
     return dict(after=after,before=before,mask=m,clip=clip,fill=strokes_fill,line=strokes_line,oc=oc,T=T,center=(cx,cy),sc=sc)
@@ -132,6 +150,7 @@ def draw_progress(layer, a_layer, stroke, f, color=None):
     for k in range(stroke.drawn-1, upto-1):
         a=tuple(int(round(v*4)) for v in stroke.p[k]); b=tuple(int(round(v*4)) for v in stroke.p[k+1])
         c=color if color is not None else tuple(int(v) for v in stroke.c[k])
+        if hasattr(stroke,'wv'): w=max(2,int(round(stroke.wv[k])))
         cv2.line(layer,a,b,c,w,cv2.LINE_AA,shift=2); cv2.line(a_layer,a,b,stroke.alpha,w,cv2.LINE_AA,shift=2)
     stroke.drawn=upto
 sc_ease=True
