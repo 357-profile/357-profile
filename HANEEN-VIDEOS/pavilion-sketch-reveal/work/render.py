@@ -43,7 +43,7 @@ def build_scene(sc):
     m=(m>127).astype(np.uint8)*255
     m=cv2.morphologyEx(m,cv2.MORPH_OPEN,np.ones((5,5),np.uint8)); m=cv2.morphologyEx(m,cv2.MORPH_CLOSE,np.ones((9,9),np.uint8))
     T=sc['timing']; W=sc.get('width',15)
-    pal=colorize(after, sc.get('sat',1.25), sc.get('val',1.0))
+    pal=colorize(after, sc.get('sat',1.18), sc.get('val',1.0), blur=sc.get('pal_blur',11))
     # dominant colour -> outline colour
     px=after[m>0].reshape(-1,3).astype(np.float32); med=np.median(px,0)
     hsv=cv2.cvtColor(np.uint8([[med]]),cv2.COLOR_RGB2HSV)[0,0].astype(float)
@@ -60,13 +60,13 @@ def build_scene(sc):
     cnts=[c for c in cnts if cv2.contourArea(c)>sc.get('min_area',1500)]
     cnts.sort(key=lambda c: c[:,0,0].min())
     for j,c in enumerate(cnts):
-        p=resample(np.r_[c[:,0,:],c[:1,0,:]],3); p=smooth_closed(p,4)
+        p=resample(np.r_[c[:,0,:],c[:1,0,:]],3); p=smooth_closed(p,8)
         nrm=np.gradient(p,axis=0); nrm=np.c_[-nrm[:,1],nrm[:,0]]; nrm/=np.linalg.norm(nrm,axis=1,keepdims=True)+1e-6
-        p=p+nrm*wobble(len(p),2.5,0.035)[:,None]
+        p=p+nrm*wobble(len(p),1.6,0.018)[:,None]
         # start at top-left-ish point, overshoot 4%
         k=int(np.argmin(p[:,0]+p[:,1])); p=np.r_[p[k:],p[:k]]; p=np.r_[p,p[:max(3,len(p)//25)]]
         stg=j/max(1,len(cnts))*T['line_stagger']
-        strokes_line.append(Stroke(p,sc.get('outline_w',6),None,T['line0']+stg,T['line1']+stg*0.3,0.97))
+        strokes_line.append(Stroke(p,sc.get('outline_w',5),None,T['line0']+stg,T['line1']+stg*0.3,0.97))
     # ---- inner detail lines (from real edges of the element)
     if sc.get('details',True):
         g=cv2.GaussianBlur(cv2.cvtColor(after,cv2.COLOR_RGB2GRAY),(0,0),sc.get('det_blur',2.2))
@@ -74,21 +74,21 @@ def build_scene(sc):
         er=cv2.erode(m,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(15,15))); e[er==0]=0
         dc,_=cv2.findContours(e,cv2.RETR_LIST,cv2.CHAIN_APPROX_NONE)
         dc=[d for d in dc if cv2.arcLength(d,False)>sc.get('det_min',90)]
-        dc.sort(key=lambda d:-cv2.arcLength(d,False)); dc=dc[:sc.get('det_max',40)]
+        dc.sort(key=lambda d:-cv2.arcLength(d,False)); dc=dc[:min(sc.get('det_max',40),14)]
         dc.sort(key=lambda d: d[:,0,0].min())
         for j,d in enumerate(dc):
             p=d[:,0,:].astype(np.float32)
             # contours from Canny are traced twice (there & back) -> keep first half
             p=p[:max(2,len(p)//2+1)]
             p=resample(p,3)
-            if len(p)>9: p=cv2.GaussianBlur(p.reshape(-1,1,2),(1,9),2).reshape(-1,2)
+            if len(p)>21: p=cv2.GaussianBlur(p.reshape(-1,1,2),(1,21),5).reshape(-1,2)
             stg=j/max(1,len(dc))*T['line_stagger']
-            strokes_line.append(Stroke(p,sc.get('det_w',3.5),None,T['line0']+0.15+stg,T['line1']+stg*0.4,0.85))
+            strokes_line.append(Stroke(p,sc.get('det_w',2.8),None,T['line0']+0.15+stg,T['line1']+stg*0.4,0.85))
     # ---- zigzag scribble per component
     for ci,i in enumerate(comps):
         cm=(lab==i).astype(np.uint8); x,y,w,h,a=st[i]
         vertical_prog = h>sc.get('vert_ratio',1.35)*w
-        s=W*sc.get('density',0.62)
+        W=W*0.78; s=W*sc.get('density',1.05)
         pts=[]
         if not vertical_prog:
             cols=np.arange(x+2,x+w-2,s)
@@ -96,24 +96,24 @@ def build_scene(sc):
                 col=np.where(cm[:,int(xx)])[0]
                 if len(col)==0: continue
                 top,bot=col.min(),col.max(); span=bot-top
-                yy=(top-rng.uniform(0,.05)*span) if k%2==0 else (bot+rng.uniform(0,.05)*span)
-                pts.append((xx+rng.normal(0,s*0.18),yy))
+                yy=(top-rng.uniform(-.04,.10)*span) if k%2==0 else (bot+rng.uniform(-.04,.10)*span)
+                pts.append((xx+rng.normal(0,s*0.18)+(sc.get('tilt',0.28)*span if k%2==0 else 0),yy))
         else:
             rows=np.arange(y+2,y+h-2,s)
             for k,yy in enumerate(rows):
                 row=np.where(cm[int(yy),:])[0]
                 if len(row)==0: continue
                 l,r=row.min(),row.max(); span=r-l
-                xx=(l-rng.uniform(0,.05)*span) if k%2==0 else (r+rng.uniform(0,.05)*span)
-                pts.append((xx,yy+rng.normal(0,s*0.18)))
+                xx=(l-rng.uniform(-.04,.10)*span) if k%2==0 else (r+rng.uniform(-.04,.10)*span)
+                pts.append((xx,yy+rng.normal(0,s*0.18)+(sc.get('tilt',0.28)*0.5*span if k%2==0 else 0)))
         if len(pts)<2: continue
-        bowed=[pts[0]]
-        for (ax,ay),(bx,by) in zip(pts[:-1],pts[1:]):
-            dx,dy=bx-ax,by-ay; L=math.hypot(dx,dy)+1e-6; b=rng.normal(0,0.035)*L
-            for t in (0.25,0.5,0.75):
-                o=b*4*t*(1-t); bowed.append((ax+dx*t-dy/L*o, ay+dy*t+dx/L*o))
-            bowed.append((bx,by))
-        p=resample(bowed,5)
+        q0=np.asarray(pts,np.float32); q=[q0[0]]
+        for a_,b_ in zip(q0[:-1],q0[1:]): q+= [a_+0.12*(b_-a_), a_+0.88*(b_-a_), b_]   # keep reach, round only the turns
+        q=np.asarray(q,np.float32)
+        for _ in range(3):   # Chaikin corner cutting -> soft rounded turns like a relaxed hand
+            a=q[:-1]; b=q[1:]; q=np.vstack([q[:1],np.stack([0.75*a+0.25*b,0.25*a+0.75*b],1).reshape(-1,2),q[-1:]])
+        p=resample(q,4)
+        if len(p)>15: p=cv2.GaussianBlur(p.reshape(-1,1,2),(1,15),3).reshape(-1,2)
         cols_=pal[np.clip(p[:,1].astype(int),0,OH-1),np.clip(p[:,0].astype(int),0,OW-1)]
         stg=ci/max(1,nC)*T['fill_stagger']
         strokes_fill.append(Stroke(p,W,cols_,T['fill0']+stg,T['fill1']-(T['fill_stagger']-stg)*0.5,0.95))
@@ -152,7 +152,7 @@ def render_scene(S, emit):
         if f<boom:
             for s in S['fill']: draw_progress(fill_rgb,fill_a,s,f)
             for s in S['line']: draw_progress(line_rgb,line_a,s,f,S['oc'])
-            fa=(fill_a*S['clip'])[...,None]; la=line_a[...,None]
+            fa=(cv2.GaussianBlur(fill_a,(0,0),0.8)*S['clip'])[...,None]; la=cv2.GaussianBlur(line_a,(0,0),0.6)[...,None]
             fr=before*(1-fa)+fill_rgb*fa; fr=fr*(1-la)+line_rgb*la
         else:
             k=f-boom; fr=after.copy()

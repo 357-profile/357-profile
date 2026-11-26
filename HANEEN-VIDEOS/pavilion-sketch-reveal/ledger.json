@@ -1,12 +1,12 @@
 {
  "video_id": "pavilion-sketch-reveal",
- "stage": "delivered_v3_awaiting_approval",
+ "stage": "delivered_v4_awaiting_approval",
  "credits_used": 0,
  "approvals": {
   "idea": "user-directed (scenes + order given directly, no credits)"
  },
  "outputs": {
-  "v3": "final/pavilion_v3_16x9.mp4"
+  "v4": "final/pavilion_v4_16x9.mp4"
  },
  "scene_order": [
   "s1_lounge",
@@ -24,5 +24,6 @@
   "s5": "haneen",
   "s6": "haneen"
  },
- "reveal": "hard cut, no flash/zoom (Haneen request)"
+ "reveal": "hard cut, no flash/zoom (Haneen request)",
+ "scribble": "softer: thinner slanted strokes, rounded turns, looser fill (Haneen request)"
 }
