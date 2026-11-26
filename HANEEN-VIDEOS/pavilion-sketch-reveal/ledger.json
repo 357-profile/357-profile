@@ -1,0 +1,4 @@
+{"video_id":"pavilion-sketch-reveal","stage":"delivered_v1_awaiting_approval","credits_used":0,
+ "approvals":{"idea":"user-directed (scenes + order given directly, no credits)"},
+ "outputs":{"v1":"final/pavilion_16x9.mp4"},
+ "scene_order":["s1_lounge","s2_meeting","s3_painting","s4_reception","s5_stairs","s6_elevators"]}
